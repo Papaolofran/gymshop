@@ -6,6 +6,8 @@ import { prepareProducts } from "../helpers";
 
 export const HomePage = () => {
 
+const { products, isLoading } = useProducts();
+
 const preparedRecentProducts = prepareProducts(recentProducts);
 const preparedDestacadosProducts = prepareProducts(destacadosProducts);
 
