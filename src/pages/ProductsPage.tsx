@@ -3,6 +3,7 @@ import { CardProduct } from "../components/shared/products/CardProduct";
 import { ContainerFilter } from "../components/shared/products/ContainerFilter";
 import { useFilteredProducts } from "../hooks";
 import { useState } from "react";
+import { Pagination } from "../components/shared/pagination";
 
 export const ProductsPage = () => {
 
@@ -49,9 +50,11 @@ export const ProductsPage = () => {
                     ))}
                 </div>
                 {/*TODO: PAGINACIÓN*/}
-                <div>
-                    
-                </div>
+                <Pagination
+                    totalItems={totalProducts}
+                    page={page}
+                    setPage={setPage}
+                />
             </div>
                 )
             }

@@ -83,4 +83,69 @@ const transformedData = producto?.map((item) => ({
 return { data: transformedData, count };
 };
 
- 
+export const getRecentProducts = async () => {
+ const { data: producto, error } = await supabase
+    .from("producto")
+    .select("*, variante(*)")
+    .order("creado", { ascending: false })
+    .limit(4);
+
+  if(error) {
+    console.log(error.message);
+    throw new Error(error.message);
+  }
+
+  // Transform database fields to match Product interface
+  return producto.map((item) => ({
+    id: item.id,
+    name: item.nombre,
+    brand: item.marca,
+    slug: item.slug || item.nombre.toLowerCase().replace(/\s+/g, '-'), // Use DB slug or generate from name
+    description: item.descripcion,
+    images: item.imagenes,
+    created_at: item.creado,
+    variants: item.variante.map((v: Tables<'variante'>) => ({
+      id: v.id,
+      stock: v.stock,
+      price: v.precio,
+      storage: v.tamaño || '', // Use tamaño as storage
+      color: v.color || '',
+      color_name: v.nombre_color || '',
+    } as VariantProduct))
+  }));
+}
+
+export const getDestacadosProducts = async () => {
+ const { data: producto, error } = await supabase
+    .from("producto")
+    .select("*, variante(*)")
+    .limit(20);
+
+  if(error) {
+    console.log(error.message);
+    throw new Error(error.message);
+  }
+
+  // Seleccionar 4 productos destacados
+
+  const destacados = producto.slice(0, 4);
+
+  // Transform database fields to match Product interface
+  return destacados.map((item) => ({
+    id: item.id,
+    name: item.nombre,
+    brand: item.marca,
+    slug: item.slug || item.nombre.toLowerCase().replace(/\s+/g, '-'), // Use DB slug or generate from name
+    description: item.descripcion,
+    images: item.imagenes,
+    created_at: item.creado,
+    variants: item.variante.map((v: Tables<'variante'>) => ({
+      id: v.id,
+      stock: v.stock,
+      price: v.precio,
+      storage: v.tamaño || '', // Use tamaño as storage
+      color: v.color || '',
+      color_name: v.nombre_color || '',
+    } as VariantProduct))
+  }));
+};
