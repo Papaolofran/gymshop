@@ -1,9 +1,10 @@
 import { prepareProducts } from "../helpers";
-import { CardProduct } from "../components/shared/products/CardProduct";
-import { ContainerFilter } from "../components/shared/products/ContainerFilter";
+import { CardProduct } from "../components/products/CardProduct";
+import { ContainerFilter } from "../components/products/ContainerFilter";
 import { useFilteredProducts } from "../hooks";
 import { useState } from "react";
 import { Pagination } from "../components/shared/pagination";
+import { Loader } from "../components/shared/Loader";
 
 export const ProductsPage = () => {
 
@@ -31,8 +32,8 @@ export const ProductsPage = () => {
 
             {
                 isLoading ? (
-                    <div className="col-span-2 flex items-center justify-center h-[500px]">
-                        <p className="text-2xl">Cargando...</p>
+                    <div className="col-span-2 lg:col-span-2 xl:col-span-4">
+                        <Loader/>
                     </div>
                 ) : (
                     <div className="col-span-2 lg:col-span-2 xl:col-span-4 flex flex-col gap-12">

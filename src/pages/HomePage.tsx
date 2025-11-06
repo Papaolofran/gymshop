@@ -1,6 +1,6 @@
-import { FeatureGrid } from "../components/shared/home/FeatureGrid";
-import { ProductGrid } from "../components/shared/home/ProductGrid";
-import { Brands } from "../components/shared/home/Brands";
+import { FeatureGrid } from "../components/home/FeatureGrid";
+import { ProductGrid } from "../components/home/ProductGrid";
+import { Brands } from "../components/home/Brands";
 import { prepareProducts } from "../helpers";
 import { useHomeProducts } from "../hooks";
 import { ProductGridSkeleton } from "../components/skeletons/ProductGridSkeleton";

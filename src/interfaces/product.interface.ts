@@ -1,6 +1,3 @@
-import type { Json } from "../supabase/supabase";
-
-
 export interface Color {
     name: string;
     color: string;
@@ -11,9 +8,17 @@ export interface VariantProduct {
   id: string;
   stock: number;
   price: number;
-  storage: string;
-  color: string;
-  color_name: string;
+  product_id: string;
+  color: string | null;
+  color_name: string | null;
+  size: string | null;
+  weight: string | null;
+  flavor: string | null;
+}
+
+export interface Category {
+    id: string;
+    name: string;
 }
 
 export interface Product {
@@ -21,9 +26,11 @@ export interface Product {
     name: string;
     brand: string;
     slug: string;
-    description: Json;
+    features: string[];
     images: string[];
     created_at: string;
+    category_id: string;
+    categories?: Category;
     variants: VariantProduct[];
 }
 
@@ -32,7 +39,6 @@ export interface PreparedProducts {
     name: string;
     brand: string;
     slug: string;
-    description: Json;
     images: string[];
     created_at: string;
     price: number;
