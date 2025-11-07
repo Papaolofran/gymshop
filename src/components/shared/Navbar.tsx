@@ -4,9 +4,13 @@ import { HiOutlineSearch, HiOutlineShoppingBag } from "react-icons/hi";
 import { FaBarsStaggered } from "react-icons/fa6";
 import { Logo } from "./Logo";
 import { useGlobalStore } from "../../store/global.store";
-export const Navbar = () => {
 
-const openSheet = useGlobalStore(state => state.openSheet);
+
+
+export const Navbar = () => {
+  const openSheet = useGlobalStore(state => state.openSheet);
+
+  const setActiveNavMobile = useGlobalStore(state => state.setActiveNavMobile); 
 
   return (
     <header className="bg-white text-black py-4 flex items-center justify-between px-5 border-b border-slate-200 lg:px-12">
@@ -51,7 +55,7 @@ const openSheet = useGlobalStore(state => state.openSheet);
         </button>
       </div>
 
-      <button className="md:hidden cursor-pointer">
+      <button className="md:hidden cursor-pointer" onClick={() => setActiveNavMobile(true)}>
         <FaBarsStaggered size={25}/>
       </button>
     </header>
