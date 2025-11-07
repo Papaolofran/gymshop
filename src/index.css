@@ -4,6 +4,26 @@
 
 @theme {
   --font-family-sans: 'Montserrat', sans-serif;
+
+  /* Animaciones personalizadas */
+  --animate-fade-in: fade-in 0.3s ease-in-out;
+  --animate-slide-in: slide-in 0.3s ease-in-out;
+  --animate-slide-in-left: slide-in-left 0.3s ease-in-out;
+
+  @keyframes fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes slide-in {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(0); }
+  }
+
+  @keyframes slide-in-left {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(0); }
+  }
 }
 
 /* CLASES PERSONALIZADAS */

@@ -10,6 +10,7 @@ import { useMemo, useEffect, useState } from "react";
 import type { VariantProduct } from "../interfaces";
 import { Tag } from "../components/shared/Tag"
 import { Loader } from "../components/shared/Loader"
+import { useCounterStore } from "../store/counter.store";
 
 // Para ropa (color + talla)
 interface ClothingAcc {
@@ -49,6 +50,10 @@ export const ProductPage = () => {
   const [selectedVariant, setSelectedVariant] = useState<VariantProduct | null>(
     null
   );
+
+  const count = useCounterStore (state => state.count);
+  const increment = useCounterStore (state => state.increment);
+  const decrement = useCounterStore (state => state.decrement);
 
   // Detectar tipo de producto
   const isClothing = product?.categories?.name?.toLowerCase() === 'ropa';
@@ -308,11 +313,13 @@ export const ProductPage = () => {
                 </p>
 
                 <div className="flex gap-8 px-5 py-3 border border-slate-200 w-fit rounded-full">
-                  <button>
+                  <button onClick={decrement}
+                          disabled={count === 1}
+                  >
                       <LuMinus size={15}/>
                   </button>
-                  <span className="text-slate-500 text-sm">1</span>
-                  <button>
+                  <span className="text-slate-500 text-sm">{count}</span>
+                  <button onClick={increment}>
                       <LuPlus size={15}/>
                   </button>
                 </div>
