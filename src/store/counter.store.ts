@@ -6,6 +6,7 @@ export interface CounterState {
   count: number;
   increment: () => void;
   decrement: () => void;
+  reset: () => void;
 }
 
 const storeApi: StateCreator<CounterState> = (set) => ({
@@ -17,6 +18,10 @@ const storeApi: StateCreator<CounterState> = (set) => ({
 
   decrement: () => {
     set(state => ({ count: Math.max(1, state.count - 1) }));
+  },
+  
+  reset: () => {
+    set({ count: 1 });
   },
 });
 

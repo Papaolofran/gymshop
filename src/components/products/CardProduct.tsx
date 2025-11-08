@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { FiPlus } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import type { VariantProduct } from "../../interfaces";
 import { formatPrice } from "../../helpers";
 import { Tag } from "../shared/Tag";
+import { HiPhoto } from "react-icons/hi2";
+import toast from 'react-hot-toast';
 
 interface Props {
     img: string;
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export const CardProduct = ({img, name, price, slug, colors, variants}: Props) => {
+    const navigate = useNavigate();
 
     const [activeColor, setActiveColor] = useState<{
       name: string;
@@ -28,33 +30,80 @@ export const CardProduct = ({img, name, price, slug, colors, variants}: Props) =
 
     const stock = selectedVariant?.stock || 0;
 
+    // Manejar click en producto
+    const handleProductClick = (e: React.MouseEvent) => {
+      if (stock === 0) {
+        e.preventDefault();
+        toast.error(`${name} está agotado`, {
+          icon: '❌',
+          duration: 3000,
+        });
+        return;
+      }
+
+      if (stock > 0 && stock <= 5) {
+        toast(`¡Solo quedan ${stock} unidades!`, {
+          icon: '⚠️',
+          duration: 2500,
+        });
+      }
+
+      // Navegar al producto
+      navigate(`/productos/${slug}`);
+    };
+
     return (
       <div className="flex flex-col gap-6 relative">
-        <Link to={`/productos/${slug}`} className="flex relative group overflow-hidden">
-          <div className="flex h-[350px] w-full items-center justify-center py-2 lg:h-[250px]">
-            <img src={img} alt={name} className="objetct-contain h-full w-full"/>
+        <div 
+          onClick={handleProductClick}
+          className={`flex relative group overflow-hidden rounded-lg bg-gray-100 ${
+            stock === 0 ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
+          }`}
+        >
+          <div className="flex w-full aspect-square items-center justify-center p-4 overflow-hidden">
+            {img ? (
+              <img 
+                src={img} 
+                alt={name} 
+                className="object-contain w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-110"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center text-gray-400">
+                <HiPhoto size={80} className="transition-transform duration-300 ease-in-out group-hover:scale-110" />
+                <p className="text-sm mt-2">Sin imagen</p>
+              </div>
+            )}
           </div>
-
-          <button className="bg-white border border-slate-200 absolute w-full bottom-0 py-3 rounded-3xl flex items-center justify-center gap-1 text-sm font-medium hover:bg-stone-100 translate-y-[100%] transition-all duration-300 group-hover:translate-y-0">
-            <FiPlus/>
-            Añadir
-          </button>
-        </Link>
+        </div>
 
         <div className="flex flex-col gap-1 items-center">
           <p className="text-[15px] font-medium">{name}</p>
           <p className="text-[15px] font-medium">{formatPrice(price)}</p>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 mt-3">
             {colors.map((color) => (
-              <span key={color.color}
-                className={
-                  `grid place-items-center w-5 h-5 rounded-full cursor-pointer`}
-                >
-                  <span className="w-[14px] h-[14px] rounded-full"
+              <button 
+                key={color.color}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevenir navegación al producto
+                  setActiveColor(color);
+                }}
+                className={`p-0.5 rounded-full cursor-pointer transition-all ${
+                  activeColor.color === color.color 
+                    ? 'ring-2 ring-black' 
+                    : 'hover:scale-110'
+                }`}
+                title={color.name}
+              >
+                <span 
+                  className={`block w-4 h-4 rounded-full transition-all ${
+                    activeColor.color === color.color
+                      ? 'border-2 border-gray-800'
+                      : 'border border-gray-400'
+                  }`}
                   style={{backgroundColor: color.color}}
-                  />
-              </span>
+                />
+              </button>
             ))}
           </div>
         </div>

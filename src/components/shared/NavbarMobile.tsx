@@ -9,10 +9,6 @@ export const NavbarMobile = () => {
       state.setActiveNavMobile
     );
 
-
-
-
-
   return <div className="bg-white text-black h-screen w-full shadow-lg animate-slide-in-left fixed z-50 flex items-start justify-center pt-20">
     <button className="absolute top-5 right-5"
       onClick={() => setActiveNavMobile(false)}>

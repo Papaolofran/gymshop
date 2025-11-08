@@ -4,6 +4,15 @@
 
 @theme {
   --font-family-sans: 'Montserrat', sans-serif;
+  
+  /* Configuración del Container */
+  --container-padding: 1rem;
+  --container-center: true;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1400px;
 
   /* Animaciones personalizadas */
   --animate-fade-in: fade-in 0.3s ease-in-out;

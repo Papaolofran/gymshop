@@ -4,13 +4,16 @@ import { HiOutlineSearch, HiOutlineShoppingBag } from "react-icons/hi";
 import { FaBarsStaggered } from "react-icons/fa6";
 import { Logo } from "./Logo";
 import { useGlobalStore } from "../../store/global.store";
+import { useCartStore } from "../../store/cart.store";
 
 
 
 export const Navbar = () => {
   const openSheet = useGlobalStore(state => state.openSheet);
-
-  const setActiveNavMobile = useGlobalStore(state => state.setActiveNavMobile); 
+  const setActiveNavMobile = useGlobalStore(state => state.setActiveNavMobile);
+  const getTotalItems = useCartStore(state => state.getTotalItems);
+  
+  const totalItems = getTotalItems(); 
 
   return (
     <header className="bg-white text-black py-4 flex items-center justify-between px-5 border-b border-slate-200 lg:px-12">
@@ -48,9 +51,11 @@ export const Navbar = () => {
         </div>
 
         <button className="relative cursor-pointer" onClick={() => openSheet("cart")}>
-          <span className="absolute -bottom-2 -right-2 w-5 h-5 grid place-items-center bg-black text-white text-xs rounded-full">
-            0
-          </span>
+          {totalItems > 0 && (
+            <span className="absolute -bottom-2 -right-2 w-5 h-5 grid place-items-center bg-black text-white text-xs rounded-full">
+              {totalItems}
+            </span>
+          )}
           <HiOutlineShoppingBag size={25}/>
         </button>
       </div>

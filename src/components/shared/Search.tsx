@@ -1,27 +1,45 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { HiOutlineSearch } from "react-icons/hi"
+import { HiPhoto } from "react-icons/hi2"
 import { IoMdClose } from "react-icons/io"
+import { useNavigate } from "react-router-dom";
 import { useGlobalStore } from "../../store/global.store.ts";
 import { formatPrice } from "../../helpers/index.ts";
 import { searchProducts } from "../../actions";
 import type { Product } from "../../interfaces/product.interface.ts";
 
 export const Search = () => {
-  
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const closeSheet = useGlobalStore (state => state.closeSheet);
 
-  const handleSearch = async(e: React.FormEvent) => {
-    e.preventDefault( );
-
-      if(searchTerm.trim()){
+  // Búsqueda en tiempo real
+  useEffect(() => {
+    const delaySearch = setTimeout(async () => {
+      if (searchTerm.trim()) {
+        setIsSearching(true);
         const products = await searchProducts(searchTerm);
         setSearchResults(products);
-
+        setIsSearching(false);
+      } else {
+        setSearchResults([]);
       }
-    }
+    }, 300); // Espera 300ms después de que el usuario deja de escribir
+
+    return () => clearTimeout(delaySearch);
+  }, [searchTerm]);
+
+  const handleSearch = async(e: React.FormEvent) => {
+    e.preventDefault();
+  };
+
+  const handleProductClick = (slug: string) => {
+    closeSheet();
+    navigate(`/productos/${slug}`);
+  };
   
   return (
     <>
@@ -36,45 +54,52 @@ export const Search = () => {
       </div>
       
       {/* Resultado de la búsqueda */}
-      <div>
-        {
-          searchResults.length > 0 ? (
-            <ul>
-              {searchResults.map(product => (
-                <li className="py-2 group" key={product.id}>
-            <button className="flex items-center gap-3">
-              <img src={product.images[0]} alt={product.name} className="h-20 w-20 object-contain p-3" />
+      <div className="p-5">
+        {isSearching ? (
+          <p className="text-sm text-gray-500 text-center py-8">Buscando...</p>
+        ) : searchTerm.trim() && searchResults.length > 0 ? (
+          <ul className="space-y-3">
+            {searchResults.map(product => (
+              <li key={product.id}>
+                <button 
+                  onClick={() => handleProductClick(product.slug)}
+                  className="flex items-center gap-4 w-full p-3 hover:bg-gray-50 rounded-lg transition-colors group"
+                >
+                  <div className="w-20 aspect-square bg-gray-100 rounded-lg flex items-center justify-center p-2 flex-shrink-0">
+                    {product.images[0] ? (
+                      <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain" />
+                    ) : (
+                      <HiPhoto size={40} className="text-gray-400" />
+                    )}
+                  </div>
 
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-semibold group-hover:underline">
-                  {product.name}
-                </p>
+                  <div className="flex flex-col gap-1 text-left flex-1">
+                    <p className="text-sm font-semibold group-hover:text-cyan-600 transition-colors">
+                      {product.name}
+                    </p>
 
-                {/* Muestra la PRIMER variante del producto buscado */}
-
-                <p className="text-[13px] text-gray-600"> 
-                  {product.variants[0].color_name || product.variants[0].weight } /{' '} 
-                  {product.variants[0].size || product.variants[0].flavor}
-                </p>
-                
-                {/* Muestra el precio */}
-                <p className="text-sm font-medium text-gray-600">
-                  {formatPrice(product.variants[0].price)}
-                </p>
-
-
-              </div>
-            </button>
-          </li>
-              ))}
-            
-        </ul>
-            ) : (
-              <p className="text-sm text-gray-600">
-                No se encontraron resultados
-              </p>
-            )
-        }
+                    <p className="text-[13px] text-gray-600"> 
+                      {product.variants[0].color_name || product.variants[0].weight} /{' '} 
+                      {product.variants[0].size || product.variants[0].flavor}
+                    </p>
+                    
+                    <p className="text-sm font-medium text-gray-900">
+                      {formatPrice(product.variants[0].price)}
+                    </p>
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : searchTerm.trim() && searchResults.length === 0 && !isSearching ? (
+          <p className="text-sm text-gray-500 text-center py-8">
+            No se encontraron resultados para "{searchTerm}"
+          </p>
+        ) : (
+          <p className="text-sm text-gray-400 text-center py-8">
+            Escribe para buscar productos...
+          </p>
+        )}
       </div>
     </>
   )

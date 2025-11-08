@@ -4,17 +4,5 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  theme: {
-    extend: {
-      container: {
-        center: true,
-        padding: '1rem',
-      },
-      
-      fontFamily: {
-        sans: ['Montserrat', 'sans-serif'],
-      },
-    },
-  },
   plugins: [require('@tailwindcss/typography')],
 };

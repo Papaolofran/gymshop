@@ -11,6 +11,9 @@ import type { VariantProduct } from "../interfaces";
 import { Tag } from "../components/shared/Tag"
 import { Loader } from "../components/shared/Loader"
 import { useCounterStore } from "../store/counter.store";
+import { useCartStore } from "../store/cart.store";
+import { useGlobalStore } from "../store/global.store";
+import type { ICartItem } from "../components/shared/CartItem";
 
 // Para ropa (color + talla)
 interface ClothingAcc {
@@ -51,9 +54,13 @@ export const ProductPage = () => {
     null
   );
 
-  const count = useCounterStore (state => state.count);
-  const increment = useCounterStore (state => state.increment);
-  const decrement = useCounterStore (state => state.decrement);
+  const count = useCounterStore(state => state.count);
+  const increment = useCounterStore(state => state.increment);
+  const decrement = useCounterStore(state => state.decrement);
+  const resetCount = useCounterStore(state => state.reset);
+  
+  const addItem = useCartStore(state => state.addItem);
+  const openSheet = useGlobalStore(state => state.openSheet);
 
   // Detectar tipo de producto
   const isClothing = product?.categories?.name?.toLowerCase() === 'ropa';
@@ -156,6 +163,40 @@ export const ProductPage = () => {
 
   // Obtener el stock
   const isOutOfStock = selectedVariant?.stock === 0;
+  
+  // Función para agregar al carrito
+  const handleAddToCart = () => {
+    if (!selectedVariant || !product) return;
+    
+    const cartItem: ICartItem = {
+      variantId: selectedVariant.id,
+      productId: product.id,
+      name: product.name,
+      brand: product.brand,
+      categoryName: product.categories?.name || '',
+      // Para ropa
+      color: selectedVariant.color || undefined,
+      colorName: selectedVariant.color_name || undefined,
+      size: selectedVariant.size || undefined,
+      // Para suplementos
+      weight: selectedVariant.weight || undefined,
+      flavor: selectedVariant.flavor || undefined,
+      price: selectedVariant.price,
+      quantity: count,
+      image: product.images[0] || '',
+      stock: selectedVariant.stock,
+    };
+    
+    addItem(cartItem);
+    resetCount();
+    openSheet('cart');
+  };
+  
+  // Función para comprar ahora
+  const handleBuyNow = () => {
+    handleAddToCart();
+    // Aquí podrías redirigir directamente al checkout si lo deseas
+  };
 
   if(isLoading) return <Loader/>
 
@@ -309,17 +350,27 @@ export const ProductPage = () => {
               {/* Contador */}
               <div className="space-y">
                 <p className="text-sm font-medium">
-                  Cantidad:
+                  Cantidad: {selectedVariant && (
+                    <span className="text-xs text-gray-500">
+                      (Stock: {selectedVariant.stock})
+                    </span>
+                  )}
                 </p>
 
                 <div className="flex gap-8 px-5 py-3 border border-slate-200 w-fit rounded-full">
-                  <button onClick={decrement}
-                          disabled={count === 1}
+                  <button 
+                    onClick={decrement}
+                    disabled={count === 1}
+                    className="disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                       <LuMinus size={15}/>
                   </button>
                   <span className="text-slate-500 text-sm">{count}</span>
-                  <button onClick={increment}>
+                  <button 
+                    onClick={increment}
+                    disabled={!selectedVariant || count >= selectedVariant.stock}
+                    className="disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                       <LuPlus size={15}/>
                   </button>
                 </div>
@@ -327,10 +378,18 @@ export const ProductPage = () => {
 
               {/* BOTONES ACCIÓN */}
               <div className="flex flex-col gap-3">
-                <button className="bg-[#f3f3f3] uppercase font-semibold tracking-widest text-xs py-4 rounded-full transition-all duration-300 hover:bg-[#e2e2e2]">
+                <button 
+                  onClick={handleAddToCart}
+                  disabled={!selectedVariant}
+                  className="bg-[#f3f3f3] uppercase font-semibold tracking-widest text-xs py-4 rounded-full transition-all duration-300 hover:bg-[#e2e2e2] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Agregar al carro
                 </button>
-                <button className="bg-black text-white uppercase font-semibold tracking-widest text-xs py-4 rounded-full">
+                <button 
+                  onClick={handleBuyNow}
+                  disabled={!selectedVariant}
+                  className="bg-black text-white uppercase font-semibold tracking-widest text-xs py-4 rounded-full hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Comprar ahora
                 </button>
               </div>

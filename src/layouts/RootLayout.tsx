@@ -20,7 +20,7 @@ export const RootLayout = () => {
         <Banner/>
       }
 
-    <main className="container my-8 flex-1">
+    <main className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 my-8 flex-1">
       <Outlet/>
     </main>
 

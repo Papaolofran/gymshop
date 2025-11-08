@@ -32,7 +32,7 @@ export const ProductsPage = () => {
 
             {
                 isLoading ? (
-                    <div className="col-span-2 lg:col-span-2 xl:col-span-4">
+                    <div className="col-span-2 lg:col-span-2 xl:col-span-4 flex items-center justify-center">
                         <Loader/>
                     </div>
                 ) : (
@@ -41,7 +41,7 @@ export const ProductsPage = () => {
                     {preparedProducts.map(product => (
                         <CardProduct
                         key={product.id}
-                        img={product.images[0]}
+                        img={product.images[0] || ''}
                         name={product.name}
                         price={product.price}
                         slug={product.slug}

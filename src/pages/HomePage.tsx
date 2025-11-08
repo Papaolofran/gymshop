@@ -13,7 +13,7 @@ const preparedRecentProducts = prepareProducts(recentProducts);
 const preparedDestacadosProducts = prepareProducts(destacadosProducts);
 
     return (
-        <div className="w-full max-w-7xl mx-auto px-4">
+        <>
             <FeatureGrid/>
 
             {
@@ -39,6 +39,6 @@ const preparedDestacadosProducts = prepareProducts(destacadosProducts);
             }
 
             <Brands/>
-        </div>
+        </>
     );
 };
