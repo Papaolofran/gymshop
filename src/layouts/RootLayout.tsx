@@ -5,12 +5,12 @@ import { Banner } from "../components/home/Banner";
 import { Newsletter } from "../components/home/Newsletter";
 import { Sheet } from "../components/shared/Sheet";
 import { useGlobalStore } from "../store/global.store";
+import { NavbarMobile } from "../components/shared/NavbarMobile";
 
 export const RootLayout = () => {
-
   const {pathname} = useLocation();
   const isSheetOpen = useGlobalStore((state) => state.isSheetOpen);
-  const activeNavMobile = useGlobalStore(state => state.setActiveNavMobile);
+  const activeNavMobile = useGlobalStore(state => state.activeNavMobile);
 
   return (
     <div className="h-screen flex flex-col font-montserrat">
@@ -20,7 +20,7 @@ export const RootLayout = () => {
         <Banner/>
       }
 
-    <main className="w-full my-8 flex-1 px-4 md:px-8">
+    <main className="container my-8 flex-1">
       <Outlet/>
     </main>
 
@@ -30,7 +30,7 @@ export const RootLayout = () => {
 
       {isSheetOpen && <Sheet/>}
 
-      {activeNavMobile %% <NavbarMobile />} 
+      {activeNavMobile && <NavbarMobile />} 
 
       <Footer/>
     </div>
