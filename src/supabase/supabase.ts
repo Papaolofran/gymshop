@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       addresses: {
@@ -64,21 +89,18 @@ export type Database = {
       categories: {
         Row: {
           created_at: string
-          description: Json
           id: string
           image: string
           name: string
         }
         Insert: {
           created_at?: string
-          description: Json
           id?: string
           image: string
           name: string
         }
         Update: {
           created_at?: string
-          description?: Json
           id?: string
           image?: string
           name?: string
@@ -212,7 +234,6 @@ export type Database = {
           brand: string
           category_id: string
           created_at: string
-          description: Json
           discount_percentage: number | null
           features: string[]
           highlighted: boolean | null
@@ -227,7 +248,6 @@ export type Database = {
           brand: string
           category_id: string
           created_at?: string
-          description: Json
           discount_percentage?: number | null
           features: string[]
           highlighted?: boolean | null
@@ -242,7 +262,6 @@ export type Database = {
           brand?: string
           category_id?: string
           created_at?: string
-          description?: Json
           discount_percentage?: number | null
           features?: string[]
           highlighted?: boolean | null
@@ -283,35 +302,29 @@ export type Database = {
       }
       users: {
         Row: {
-          birth_date: string
           created_at: string
           email: string
           full_name: string
           id: string
-          password: string
-          phone_number: string
+          phone: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
-          birth_date: string
           created_at?: string
           email: string
           full_name: string
           id?: string
-          password: string
-          phone_number: string
+          phone?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
-          birth_date?: string
           created_at?: string
           email?: string
           full_name?: string
           id?: string
-          password?: string
-          phone_number?: string
+          phone?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -495,6 +508,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
