@@ -10,6 +10,7 @@ import {
   updateProduct,
   deleteProduct
 } from '../controllers/product.controller.js';
+import variantRoutes from './variant.routes.js';
 
 const router = Router();
 
@@ -26,5 +27,8 @@ router.get('/slug/:slug', getProductBySlug);                            // Obten
 router.post('/', authenticate, authorize('admin'), createProduct);      // Crear producto (solo admin)
 router.put('/:id', authenticate, authorize('admin'), updateProduct);    // Actualizar producto (solo admin)
 router.delete('/:id', authenticate, authorize('admin'), deleteProduct); // Eliminar producto (solo admin)
+
+// Rutas anidadas de variantes
+router.use('/:productId/variants', variantRoutes);                      // Variantes del producto
 
 export default router;
