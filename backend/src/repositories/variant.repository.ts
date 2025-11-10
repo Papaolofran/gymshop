@@ -87,4 +87,17 @@ export class VariantRepository {
     if (error && error.code !== 'PGRST116') throw error;
     return data;
   }
+
+  // Actualizar stock de una variante
+  async updateStock(id: string, newStock: number) {
+    const { data, error } = await supabase
+      .from('variants')
+      .update({ stock: newStock })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
 }
