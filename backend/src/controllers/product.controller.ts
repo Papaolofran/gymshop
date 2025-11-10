@@ -67,3 +67,60 @@ export const getFeaturedProducts = async (req: Request, res: Response) => {
     data: products
   });
 };
+
+// POST /api/products - Crear nuevo producto (solo admin)
+export const createProduct = async (req: Request, res: Response) => {
+  const { name, slug, description, brand, basePrice, categoryId, images, isFeatured } = req.body;
+
+  const product = await productService.createProduct({
+    name,
+    slug,
+    description,
+    brand,
+    basePrice,
+    categoryId,
+    images,
+    isFeatured
+  });
+
+  res.status(201).json({
+    success: true,
+    message: 'Producto creado correctamente',
+    data: product
+  });
+};
+
+// PUT /api/products/:id - Actualizar producto (solo admin)
+export const updateProduct = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { name, slug, description, brand, basePrice, categoryId, images, isFeatured } = req.body;
+
+  const product = await productService.updateProduct(id, {
+    name,
+    slug,
+    description,
+    brand,
+    basePrice,
+    categoryId,
+    images,
+    isFeatured
+  });
+
+  res.json({
+    success: true,
+    message: 'Producto actualizado correctamente',
+    data: product
+  });
+};
+
+// DELETE /api/products/:id - Eliminar producto (solo admin)
+export const deleteProduct = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const result = await productService.deleteProduct(id);
+
+  res.json({
+    success: true,
+    message: result.message
+  });
+};

@@ -117,6 +117,100 @@ export class ProductService {
     }
   }
 
+  // Crear nuevo producto (solo admin)
+  async createProduct(productData: {
+    name: string;
+    slug: string;
+    description: string;
+    brand: string;
+    basePrice: number;
+    categoryId: string;
+    images: string[];
+    isFeatured?: boolean;
+  }) {
+    try {
+      const product = await this.productRepository.create({
+        name: productData.name,
+        slug: productData.slug,
+        description: productData.description,
+        brand: productData.brand,
+        base_price: productData.basePrice,
+        category_id: productData.categoryId,
+        images: productData.images,
+        is_featured: productData.isFeatured || false
+      });
+
+      return this.transformProduct(product);
+    } catch {
+      throw new ApiError(500, 'Error al crear producto');
+    }
+  }
+
+  // Actualizar producto (solo admin)
+  async updateProduct(id: string, productData: {
+    name?: string;
+    slug?: string;
+    description?: string;
+    brand?: string;
+    basePrice?: number;
+    categoryId?: string;
+    images?: string[];
+    isFeatured?: boolean;
+  }) {
+    try {
+      const existingProduct = await this.productRepository.findById(id);
+
+      if (!existingProduct) {
+        throw new ApiError(404, 'Producto no encontrado');
+      }
+
+      const updateData: {
+        name?: string;
+        slug?: string;
+        description?: string;
+        brand?: string;
+        base_price?: number;
+        category_id?: string;
+        images?: string[];
+        is_featured?: boolean;
+      } = {};
+
+      if (productData.name) updateData.name = productData.name;
+      if (productData.slug) updateData.slug = productData.slug;
+      if (productData.description) updateData.description = productData.description;
+      if (productData.brand) updateData.brand = productData.brand;
+      if (productData.basePrice) updateData.base_price = productData.basePrice;
+      if (productData.categoryId) updateData.category_id = productData.categoryId;
+      if (productData.images) updateData.images = productData.images;
+      if (productData.isFeatured !== undefined) updateData.is_featured = productData.isFeatured;
+
+      const updatedProduct = await this.productRepository.update(id, updateData);
+
+      return this.transformProduct(updatedProduct);
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(500, 'Error al actualizar producto');
+    }
+  }
+
+  // Eliminar producto (solo admin)
+  async deleteProduct(id: string) {
+    try {
+      const product = await this.productRepository.findById(id);
+
+      if (!product) {
+        throw new ApiError(404, 'Producto no encontrado');
+      }
+
+      await this.productRepository.delete(id);
+
+      return { message: 'Producto eliminado correctamente' };
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(500, 'Error al eliminar producto');
+    }
+  }
+
   // Transformar producto de BD a formato del frontend
   private transformProduct(product: ProductFromDB) {
     return {

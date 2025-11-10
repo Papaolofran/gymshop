@@ -15,7 +15,7 @@ export class ProductRepository {
       .order('created_at', { ascending: false });
 
     if (limit) query = query.limit(limit);
-    if (offset) query = query.range(offset, offset + limit - 1);
+    if (offset && limit) query = query.range(offset, offset + limit - 1);
 
     const { data, error } = await query;
 
@@ -120,5 +120,59 @@ export class ProductRepository {
 
     if (error) throw error;
     return count || 0;
+  }
+
+  // Crear nuevo producto
+  async create(productData: {
+    name: string;
+    slug: string;
+    description: string;
+    brand: string;
+    base_price: number;
+    category_id: string;
+    images: string[];
+    is_featured?: boolean;
+  }) {
+    const { data, error } = await supabase
+      .from('products')
+      .insert(productData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  // Actualizar producto
+  async update(id: string, productData: {
+    name?: string;
+    slug?: string;
+    description?: string;
+    brand?: string;
+    base_price?: number;
+    category_id?: string;
+    images?: string[];
+    is_featured?: boolean;
+  }) {
+    const { data, error } = await supabase
+      .from('products')
+      .update(productData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  // Eliminar producto
+  async delete(id: string) {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
   }
 }
