@@ -7,6 +7,7 @@ import {
   deleteUser,
   updateUserRole
 } from '../controllers/user.controller.js';
+import addressRoutes from './address.routes.js';
 
 const router = Router();
 
@@ -19,5 +20,8 @@ router.get('/:id', authenticate, getUserById);                                //
 router.put('/:id', authenticate, updateUser);                                 // Actualizar perfil
 router.delete('/:id', authenticate, authorize('admin'), deleteUser);          // Eliminar (solo admin)
 router.put('/:userId/role', authenticate, authorize('admin'), updateUserRole);// Cambiar rol (solo admin)
+
+// Rutas anidadas de direcciones
+router.use('/:userId/addresses', addressRoutes);                              // Direcciones del usuario
 
 export default router;
