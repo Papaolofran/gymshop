@@ -3,6 +3,7 @@ import { useUser } from '../hooks/auth/useUser';
 import { useOrdersByUser } from '../hooks/useOrders';
 import { formatPrice } from '../helpers';
 import { LuLoaderCircle } from 'react-icons/lu';
+import { HiPhoto } from 'react-icons/hi2';
 import type { Order } from '../services/orderService';
 
 const statusColors: Record<string, string> = {
@@ -54,7 +55,7 @@ export const OrdersUserPage = () => {
 						Todavía no has hecho ningún pedido
 					</p>
 					<Link
-						to='/products'
+						to='/productos'
 						className='bg-black text-white uppercase font-semibold tracking-widest text-xs py-4 rounded-full px-8 hover:bg-gray-800 transition-colors'
 					>
 						Empezar a comprar
@@ -65,7 +66,7 @@ export const OrdersUserPage = () => {
 					{orders.map((order: Order) => (
 						<Link
 							key={order.id}
-							to={`/orders/${order.id}`}
+							to={`/orders/${order.id.toString()}`}
 							className="block bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
 						>
 							<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -73,7 +74,7 @@ export const OrdersUserPage = () => {
 								<div className="flex-1">
 									<div className="flex items-center gap-3 mb-2">
 										<h3 className="font-semibold">
-											Orden #{order.id.slice(0, 8)}
+											Orden #{order.id}
 										</h3>
 										<span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[order.status]}`}>
 											{statusLabels[order.status]}
@@ -105,12 +106,17 @@ export const OrdersUserPage = () => {
 							{/* Productos (preview) */}
 							<div className="flex gap-2 mt-4 flex-wrap">
 								{order.items.slice(0, 3).map((item: Order['items'][0]) => (
-									<img
-										key={item.id}
-										src={item.variant.product.images[0]}
-										alt={item.variant.product.name}
-										className="w-16 h-16 object-cover rounded-md"
-									/>
+									<div key={item.id} className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
+										{item.variant.product.images && item.variant.product.images.length > 0 ? (
+											<img
+												src={item.variant.product.images[0]}
+												alt={item.variant.product.name}
+												className="w-full h-full object-cover"
+											/>
+										) : (
+											<HiPhoto className="text-gray-400" size={30} />
+										)}
+									</div>
 								))}
 								{order.items.length > 3 && (
 									<div className="w-16 h-16 bg-gray-100 rounded-md flex items-center justify-center text-sm text-gray-600">

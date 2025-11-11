@@ -8,8 +8,7 @@ export class VariantRepository {
     const { data, error } = await supabase
       .from('variants')
       .select('*')
-      .eq('product_id', productId)
-      .order('created_at', { ascending: false });
+      .eq('product_id', productId);
 
     if (error) throw error;
     return data;

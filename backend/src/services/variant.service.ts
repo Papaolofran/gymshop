@@ -37,7 +37,7 @@ export class VariantService {
 
       const variants = await this.variantRepository.findByProductId(productId);
 
-      return variants.map(this.transformVariant);
+      return variants.map((v) => this.transformVariant(v));
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, 'Error al obtener variantes');

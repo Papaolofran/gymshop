@@ -19,7 +19,7 @@ export const ProfilePage = () => {
     if (userData) {
       setFormData({
         fullName: userData.fullName,
-        phone: userData.phone
+        phone: userData.phone || ''
       });
     }
   }, [userData]);
@@ -95,7 +95,7 @@ export const ProfilePage = () => {
               <LuPhone className="text-gray-400 mt-1 flex-shrink-0" size={20} />
               <div className="flex-1 min-w-0">
                 <p className="text-xs sm:text-sm text-gray-600 mb-1">Teléfono</p>
-                <p className="font-semibold text-sm sm:text-base">{userData.phone}</p>
+                <p className="font-semibold text-sm sm:text-base">{userData.phone || 'No registrado'}</p>
               </div>
             </div>
 
@@ -152,11 +152,10 @@ export const ProfilePage = () => {
 
             <div>
               <label className="block text-xs sm:text-sm font-medium mb-2">
-                Teléfono
+                Teléfono <span className="text-gray-400 text-xs">(Opcional)</span>
               </label>
               <input
                 type="tel"
-                required
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"

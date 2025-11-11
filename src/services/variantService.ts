@@ -7,27 +7,34 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 export interface Variant {
   id: string;
   productId: string;
-  sku: string;
-  attributes: Record<string, string>;
   price: number;
   stock: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  color?: string | null;
+  colorName?: string | null;
+  size?: string | null;
+  flavor?: string | null;
+  weight?: string | null;
 }
 
 // Interface para crear/actualizar variante
 export interface VariantFormData {
-  sku: string;
-  attributes: Record<string, string>;
   price: number;
   stock: number;
-  isActive?: boolean;
+  color?: string;
+  colorName?: string;
+  size?: string;
+  flavor?: string;
+  weight?: string;
 }
 
 // Obtener variantes de un producto
 export const getVariantsByProduct = async (productId: string): Promise<Variant[]> => {
-  const response = await axios.get(`${API_URL}/products/${productId}/variants`);
+  const token = await getAuthToken();
+  const response = await axios.get(`${API_URL}/products/${productId}/variants`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
   return response.data.data;
 };
 

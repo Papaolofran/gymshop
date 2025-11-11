@@ -24,15 +24,14 @@ export const ProductVariantsPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
   const [formData, setFormData] = useState<VariantFormData>({
-    sku: '',
-    attributes: {},
     price: 0,
     stock: 0,
-    isActive: true
+    color: '',
+    colorName: '',
+    size: '',
+    flavor: '',
+    weight: ''
   });
-
-  const [attributeKey, setAttributeKey] = useState('');
-  const [attributeValue, setAttributeValue] = useState('');
 
   if (!session) {
     return <Navigate to="/login" />;
@@ -89,57 +88,39 @@ export const ProductVariantsPage = () => {
   const handleEdit = (variant: Variant) => {
     setEditingVariant(variant);
     setFormData({
-      sku: variant.sku,
-      attributes: variant.attributes,
       price: variant.price,
       stock: variant.stock,
-      isActive: variant.isActive
+      color: variant.color || '',
+      colorName: variant.colorName || '',
+      size: variant.size || '',
+      flavor: variant.flavor || '',
+      weight: variant.weight || ''
     });
     setShowForm(true);
   };
 
-  const handleDelete = (variantId: string, sku: string) => {
-    if (confirm(`¿Estás seguro de eliminar la variante ${sku}?`)) {
+  const handleDelete = (variantId: string) => {
+    if (confirm('¿Estás seguro de eliminar esta variante?')) {
       deleteVariant(variantId);
     }
   };
 
   const resetForm = () => {
     setFormData({
-      sku: '',
-      attributes: {},
       price: 0,
       stock: 0,
-      isActive: true
+      color: '',
+      colorName: '',
+      size: '',
+      flavor: '',
+      weight: ''
     });
     setEditingVariant(null);
-    setAttributeKey('');
-    setAttributeValue('');
   };
 
   const handleCancel = () => {
     setShowForm(false);
     resetForm();
-  };
-
-  const handleAddAttribute = () => {
-    if (attributeKey && attributeValue) {
-      setFormData({
-        ...formData,
-        attributes: {
-          ...formData.attributes,
-          [attributeKey]: attributeValue
-        }
-      });
-      setAttributeKey('');
-      setAttributeValue('');
-    }
-  };
-
-  const handleRemoveAttribute = (key: string) => {
-    const newAttributes = { ...formData.attributes };
-    delete newAttributes[key];
-    setFormData({ ...formData, attributes: newAttributes });
   };
 
   return (
@@ -178,99 +159,85 @@ export const ProductVariantsPage = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">SKU</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.sku}
-                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                  placeholder="PROT-WHY-1KG-CHOC"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Precio</label>
+                <label className="block text-sm font-medium mb-1">Precio *</label>
                 <input
                   type="number"
                   required
                   min="0"
                   step="0.01"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2"
                   placeholder="29990"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Stock</label>
+                <label className="block text-sm font-medium mb-1">Stock *</label>
                 <input
                   type="number"
                   required
                   min="0"
                   value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2"
                   placeholder="50"
                 />
               </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <label htmlFor="isActive" className="text-sm font-medium">
-                  Variante activa
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Atributos</label>
-              <div className="space-y-2 mb-2">
-                {Object.entries(formData.attributes).map(([key, value]) => (
-                  <div key={key} className="flex items-center gap-2 bg-gray-50 p-2 rounded">
-                    <span className="flex-1">
-                      <strong>{key}:</strong> {value}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveAttribute(key)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <LuTrash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-2">
+              <div>
+                <label className="block text-sm font-medium mb-1">Color (código hex)</label>
                 <input
                   type="text"
-                  value={attributeKey}
-                  onChange={(e) => setAttributeKey(e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
-                  placeholder="Clave (ej: color, talla)"
+                  value={formData.color}
+                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  placeholder="#FF0000"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Nombre del color</label>
                 <input
                   type="text"
-                  value={attributeValue}
-                  onChange={(e) => setAttributeValue(e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
-                  placeholder="Valor (ej: Rojo, XL)"
+                  value={formData.colorName}
+                  onChange={(e) => setFormData({ ...formData, colorName: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  placeholder="Rojo"
                 />
-                <button
-                  type="button"
-                  onClick={handleAddAttribute}
-                  className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-                >
-                  Agregar
-                </button>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Talla/Tamaño</label>
+                <input
+                  type="text"
+                  value={formData.size}
+                  onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  placeholder="XL, M, L"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Sabor</label>
+                <input
+                  type="text"
+                  value={formData.flavor}
+                  onChange={(e) => setFormData({ ...formData, flavor: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  placeholder="Chocolate, Vainilla"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Peso</label>
+                <input
+                  type="text"
+                  value={formData.weight}
+                  onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                  placeholder="1kg, 500g"
+                />
               </div>
             </div>
 
@@ -319,40 +286,40 @@ export const ProductVariantsPage = () => {
           <table className="w-full">
             <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold">SKU</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold">Atributos</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold">Precio</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold">Stock</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold">Estado</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold">Color</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold">Talla</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold">Sabor</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold">Peso</th>
                 <th className="px-6 py-4 text-center text-sm font-semibold">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {variants.map((variant) => (
                 <tr key={variant.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm">{variant.sku}</td>
-                  <td className="px-6 py-4 text-sm">
-                    {Object.entries(variant.attributes).map(([key, value]) => (
-                      <span key={key} className="inline-block bg-gray-100 px-2 py-1 rounded mr-1 mb-1 text-xs">
-                        {key}: {value}
-                      </span>
-                    ))}
-                  </td>
                   <td className="px-6 py-4 text-sm font-semibold">{formatPrice(variant.price)}</td>
                   <td className="px-6 py-4 text-sm">
                     <span className={variant.stock === 0 ? 'text-red-600 font-semibold' : ''}>
                       {variant.stock}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                      variant.isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {variant.isActive ? 'Activa' : 'Inactiva'}
-                    </span>
+                  <td className="px-6 py-4 text-sm">
+                    {variant.color && variant.colorName ? (
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-6 h-6 rounded border border-gray-300" 
+                          style={{ backgroundColor: variant.color }}
+                        />
+                        <span>{variant.colorName}</span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
                   </td>
+                  <td className="px-6 py-4 text-sm">{variant.size || '-'}</td>
+                  <td className="px-6 py-4 text-sm">{variant.flavor || '-'}</td>
+                  <td className="px-6 py-4 text-sm">{variant.weight || '-'}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2">
                       <button
@@ -363,7 +330,7 @@ export const ProductVariantsPage = () => {
                         <LuPencil size={18} />
                       </button>
                       <button
-                        onClick={() => handleDelete(variant.id, variant.sku)}
+                        onClick={() => handleDelete(variant.id)}
                         disabled={isDeleting}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
                       >

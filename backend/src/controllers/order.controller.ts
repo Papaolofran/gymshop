@@ -43,7 +43,7 @@ export const getOrderById = async (req: AuthRequest, res: Response) => {
   }
 
   const isAdmin = req.user.role === 'admin';
-  const order = await orderService.getOrderById(id, req.user.id, isAdmin);
+  const order = await orderService.getOrderById(parseInt(id), req.user.id, isAdmin);
 
   res.json({
     success: true,
@@ -84,7 +84,7 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response) => {
     throw new ApiError(400, 'El estado es requerido');
   }
 
-  const result = await orderService.updateOrderStatus(id, status);
+  const result = await orderService.updateOrderStatus(parseInt(id), status);
 
   res.json({
     success: true,

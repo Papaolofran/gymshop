@@ -32,14 +32,16 @@ export const getVariantById = async (req: Request, res: Response) => {
 // POST /api/products/:productId/variants - Crear variante (solo admin)
 export const createVariant = async (req: Request, res: Response) => {
   const { productId } = req.params;
-  const { sku, attributes, price, stock, isActive } = req.body;
+  const { price, stock, color, colorName, size, flavor, weight } = req.body;
 
   const variant = await variantService.createVariant(productId, {
-    sku,
-    attributes,
     price,
     stock,
-    isActive
+    color,
+    colorName,
+    size,
+    flavor,
+    weight
   });
 
   res.status(201).json({
@@ -52,14 +54,16 @@ export const createVariant = async (req: Request, res: Response) => {
 // PUT /api/products/:productId/variants/:id - Actualizar variante (solo admin)
 export const updateVariant = async (req: Request, res: Response) => {
   const { productId, id } = req.params;
-  const { sku, attributes, price, stock, isActive } = req.body;
+  const { price, stock, color, colorName, size, flavor, weight } = req.body;
 
   const variant = await variantService.updateVariant(id, productId, {
-    sku,
-    attributes,
     price,
     stock,
-    isActive
+    color,
+    colorName,
+    size,
+    flavor,
+    weight
   });
 
   res.json({

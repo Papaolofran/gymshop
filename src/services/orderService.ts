@@ -14,11 +14,13 @@ export interface CreateOrderData {
 
 // Interface para orden
 export interface Order {
-  id: string;
+  id: number;
   userId: string;
   addressId: string;
   totalAmount: number;
   status: string;
+  deliveryDate?: string;
+  shippingCost?: number;
   address: {
     street: string;
     city: string;
@@ -32,8 +34,13 @@ export interface Order {
     quantity: number;
     price: number;
     variant: {
-      sku: string;
-      attributes: Record<string, string>;
+      id: string;
+      price: number;
+      color?: string | null;
+      colorName?: string | null;
+      size?: string | null;
+      flavor?: string | null;
+      weight?: string | null;
       product: {
         name: string;
         images: string[];

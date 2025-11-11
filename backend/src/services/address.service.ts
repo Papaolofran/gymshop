@@ -6,12 +6,12 @@ import { ApiError } from '../middlewares/errorHandler.js';
 interface AddressFromDB {
   id: string;
   user_id: string;
-  street: string;
+  address_line1: string;
+  address_line2: string | null;
   city: string;
   state: string;
   postal_code: string;
   country: string;
-  is_default: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -34,9 +34,16 @@ export class AddressService {
         throw new ApiError(403, 'No tienes permisos para ver estas direcciones');
       }
 
-      const addresses = await this.addressRepository.findByUserId(userId);
+      // Obtener el ID de la tabla users
+      const user = await this.userRepository.findByUserId(userId);
+      
+      if (!user) {
+        throw new ApiError(404, 'Usuario no encontrado');
+      }
 
-      return addresses.map(this.transformAddress);
+      const addresses = await this.addressRepository.findByUserId(user.id);
+
+      return addresses.map((a) => this.transformAddress(a));
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, 'Error al obtener direcciones');
@@ -87,25 +94,21 @@ export class AddressService {
         throw new ApiError(404, 'Usuario no encontrado');
       }
 
-      // Si se marca como predeterminada, quitar el estado de las demás
-      if (addressData.isDefault) {
-        await this.addressRepository.unsetDefaultForUser(userId);
-      }
-
       const address = await this.addressRepository.create({
-        user_id: userId,
-        street: addressData.street,
+        user_id: user.id,
+        address_line1: addressData.street,
         city: addressData.city,
         state: addressData.state,
         postal_code: addressData.postalCode,
-        country: addressData.country,
-        is_default: addressData.isDefault || false
+        country: addressData.country
       });
 
       return this.transformAddress(address);
     } catch (error) {
       if (error instanceof ApiError) throw error;
-      throw new ApiError(500, 'Error al crear dirección');
+      console.error('Error detallado al crear dirección:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      throw new ApiError(500, `Error al crear dirección: ${errorMessage}`);
     }
   }
 
@@ -133,26 +136,19 @@ export class AddressService {
         throw new ApiError(403, 'No tienes permisos para actualizar esta dirección');
       }
 
-      // Si se marca como predeterminada, quitar el estado de las demás
-      if (addressData.isDefault && !address.is_default) {
-        await this.addressRepository.unsetDefaultForUser(userId);
-      }
-
       const updateData: {
-        street?: string;
+        address_line1?: string;
         city?: string;
         state?: string;
         postal_code?: string;
         country?: string;
-        is_default?: boolean;
       } = {};
 
-      if (addressData.street) updateData.street = addressData.street;
+      if (addressData.street) updateData.address_line1 = addressData.street;
       if (addressData.city) updateData.city = addressData.city;
       if (addressData.state) updateData.state = addressData.state;
       if (addressData.postalCode) updateData.postal_code = addressData.postalCode;
       if (addressData.country) updateData.country = addressData.country;
-      if (addressData.isDefault !== undefined) updateData.is_default = addressData.isDefault;
 
       const updatedAddress = await this.addressRepository.update(id, updateData);
 
@@ -194,12 +190,12 @@ export class AddressService {
     return {
       id: address.id,
       userId: address.user_id,
-      street: address.street,
+      street: address.address_line1,
       city: address.city,
       state: address.state,
       postalCode: address.postal_code,
       country: address.country,
-      isDefault: address.is_default,
+      isDefault: false, // Siempre false ya que no existe en BD
       createdAt: address.created_at,
       updatedAt: address.updated_at
     };

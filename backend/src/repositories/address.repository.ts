@@ -30,12 +30,12 @@ export class AddressRepository {
   // Crear nueva dirección
   async create(addressData: {
     user_id: string;
-    street: string;
+    address_line1: string;
+    address_line2?: string | null;
     city: string;
     state: string;
     postal_code: string;
     country: string;
-    is_default?: boolean;
   }) {
     const { data, error } = await supabase
       .from('addresses')
@@ -49,12 +49,12 @@ export class AddressRepository {
 
   // Actualizar dirección
   async update(id: string, addressData: {
-    street?: string;
+    address_line1?: string;
+    address_line2?: string | null;
     city?: string;
     state?: string;
     postal_code?: string;
     country?: string;
-    is_default?: boolean;
   }) {
     const { data, error } = await supabase
       .from('addresses')
@@ -78,14 +78,4 @@ export class AddressRepository {
     return true;
   }
 
-  // Quitar el estado por defecto de todas las direcciones del usuario
-  async unsetDefaultForUser(userId: string) {
-    const { error } = await supabase
-      .from('addresses')
-      .update({ is_default: false })
-      .eq('user_id', userId);
-
-    if (error) throw error;
-    return true;
-  }
 }

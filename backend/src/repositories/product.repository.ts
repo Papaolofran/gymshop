@@ -64,7 +64,7 @@ export class ProductRepository {
         category:categories(*),
         variants(*)
       `)
-      .or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
+      .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -105,7 +105,7 @@ export class ProductRepository {
         category:categories(*),
         variants(*)
       `)
-      .eq('is_featured', true)
+      .eq('highlighted', true)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -126,12 +126,11 @@ export class ProductRepository {
   async create(productData: {
     name: string;
     slug: string;
-    description: string;
+    features: string[];
     brand: string;
-    base_price: number;
     category_id: string;
     images: string[];
-    is_featured?: boolean;
+    highlighted?: boolean;
   }) {
     const { data, error } = await supabase
       .from('products')
@@ -147,12 +146,11 @@ export class ProductRepository {
   async update(id: string, productData: {
     name?: string;
     slug?: string;
-    description?: string;
+    features?: string[];
     brand?: string;
-    base_price?: number;
     category_id?: string;
     images?: string[];
-    is_featured?: boolean;
+    highlighted?: boolean;
   }) {
     const { data, error } = await supabase
       .from('products')

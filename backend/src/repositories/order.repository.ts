@@ -48,7 +48,7 @@ export class OrderRepository {
   }
 
   // Obtener una orden específica
-  async findById(id: string) {
+  async findById(id: number) {
     const { data, error } = await supabase
       .from('orders')
       .select(`
@@ -73,9 +73,10 @@ export class OrderRepository {
   // Crear nueva orden
   async create(orderData: {
     user_id: string;
-    address_id: string;
-    total_amount: number;
-    status?: string;
+    direction_id: string;
+    delivery_date: string;
+    shipping_cost: number;
+    state?: string;
   }) {
     const { data, error } = await supabase
       .from('orders')
@@ -88,10 +89,10 @@ export class OrderRepository {
   }
 
   // Actualizar estado de orden
-  async updateStatus(id: string, status: string) {
+  async updateStatus(id: number, state: string) {
     const { data, error } = await supabase
       .from('orders')
-      .update({ status })
+      .update({ state })
       .eq('id', id)
       .select()
       .single();
@@ -102,7 +103,7 @@ export class OrderRepository {
 
   // Crear items de orden
   async createOrderItems(items: Array<{
-    order_id: string;
+    order_id: number;
     variant_id: string;
     quantity: number;
     price: number;
@@ -117,7 +118,7 @@ export class OrderRepository {
   }
 
   // Obtener items de una orden
-  async findItemsByOrderId(orderId: string) {
+  async findItemsByOrderId(orderId: number) {
     const { data, error } = await supabase
       .from('order_items')
       .select(`

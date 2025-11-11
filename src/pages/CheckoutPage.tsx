@@ -17,15 +17,16 @@ export const CheckoutPage = () => {
   const { data: addresses = [], isLoading: loadingAddresses } = useAddressesByUser(userId);
   
   const [selectedAddress, setSelectedAddress] = useState('');
+  const [orderCompleted, setOrderCompleted] = useState(false);
 
   // Redirigir si no hay sesión
   if (!session?.user) {
     return <Navigate to="/login" />;
   }
 
-  // Redirigir si el carrito está vacío
-  if (items.length === 0) {
-    return <Navigate to="/products" />;
+  // Redirigir si el carrito está vacío (solo si no está procesando ni completó la orden)
+  if (items.length === 0 && !isPending && !orderCompleted) {
+    return <Navigate to="/productos" />;
   }
 
   const handleCheckout = () => {
@@ -44,8 +45,9 @@ export const CheckoutPage = () => {
 
     createOrder(orderData, {
       onSuccess: (order) => {
+        setOrderCompleted(true);
         clearCart();
-        navigate(`/orders/${order.id}`);
+        navigate(`/orders/${order.id.toString()}`);
       }
     });
   };

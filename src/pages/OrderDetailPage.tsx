@@ -3,6 +3,7 @@ import { useUser } from '../hooks/auth/useUser';
 import { useOrderById } from '../hooks/useOrders';
 import { formatPrice } from '../helpers';
 import { LuLoaderCircle, LuPackage } from 'react-icons/lu';
+import { HiPhoto } from 'react-icons/hi2';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -53,7 +54,7 @@ export const OrderDetailPage = () => {
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-3xl font-bold">Orden #{order.id.slice(0, 8)}</h1>
+            <h1 className="text-3xl font-bold">Orden #{order.id}</h1>
             <p className="text-gray-600">
               {new Date(order.createdAt).toLocaleDateString('es-ES', {
                 year: 'numeric',
@@ -83,23 +84,33 @@ export const OrderDetailPage = () => {
                   key={item.id}
                   className="flex gap-4 pb-4 border-b border-gray-200 last:border-0"
                 >
-                  <img
-                    src={item.variant.product.images[0]}
-                    alt={item.variant.product.name}
-                    className="w-20 h-20 object-cover rounded-md"
-                  />
+                  <div className="w-20 h-20 flex-shrink-0 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
+                    {item.variant.product.images && item.variant.product.images.length > 0 ? (
+                      <img
+                        src={item.variant.product.images[0]}
+                        alt={item.variant.product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <HiPhoto className="text-gray-400" size={40} />
+                    )}
+                  </div>
                   
                   <div className="flex-1">
                     <h3 className="font-semibold">{item.variant.product.name}</h3>
                     <p className="text-sm text-gray-600">
-                      SKU: {item.variant.sku}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {Object.entries(item.variant.attributes).map(([key, value]) => (
-                        <span key={key} className="mr-2">
-                          {key}: {value}
-                        </span>
-                      ))}
+                      {item.variant.color && item.variant.colorName && (
+                        <span className="mr-2">Color: {item.variant.colorName}</span>
+                      )}
+                      {item.variant.size && (
+                        <span className="mr-2">Talla: {item.variant.size}</span>
+                      )}
+                      {item.variant.flavor && (
+                        <span className="mr-2">Sabor: {item.variant.flavor}</span>
+                      )}
+                      {item.variant.weight && (
+                        <span className="mr-2">Peso: {item.variant.weight}</span>
+                      )}
                     </p>
                     <p className="text-sm text-gray-600">
                       Cantidad: {item.quantity}

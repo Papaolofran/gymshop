@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useUser } from '../hooks/auth/useUser';
 import { useAddressesByUser, useCreateAddress, useUpdateAddress, useDeleteAddress } from '../hooks/useAddresses';
-import { LuLoaderCircle, LuPlus, LuPencil, LuTrash2, LuCheck } from 'react-icons/lu';
+import { LuLoaderCircle, LuPlus, LuPencil, LuTrash2 } from 'react-icons/lu';
 import type { Address, AddressFormData } from '../services/addressService';
 
 export const AddressesPage = () => {
@@ -21,8 +21,7 @@ export const AddressesPage = () => {
     city: '',
     state: '',
     postalCode: '',
-    country: 'Chile',
-    isDefault: false
+    country: 'Argentina'
   });
 
   if (!session) {
@@ -60,8 +59,7 @@ export const AddressesPage = () => {
       city: address.city,
       state: address.state,
       postalCode: address.postalCode,
-      country: address.country,
-      isDefault: address.isDefault
+      country: address.country
     });
     setShowForm(true);
   };
@@ -78,8 +76,7 @@ export const AddressesPage = () => {
       city: '',
       state: '',
       postalCode: '',
-      country: 'Chile',
-      isDefault: false
+      country: 'Argentina'
     });
     setEditingAddress(null);
   };
@@ -183,19 +180,6 @@ export const AddressesPage = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isDefault"
-                checked={formData.isDefault}
-                onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                className="w-4 h-4"
-              />
-              <label htmlFor="isDefault" className="text-sm font-medium">
-                Establecer como dirección predeterminada
-              </label>
-            </div>
-
             <div className="flex gap-3">
               <button
                 type="submit"
@@ -243,14 +227,7 @@ export const AddressesPage = () => {
               key={address.id}
               className="bg-white p-6 rounded-lg shadow-md relative"
             >
-              {address.isDefault && (
-                <div className="absolute top-4 right-4 flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
-                  <LuCheck size={14} />
-                  Por defecto
-                </div>
-              )}
-
-              <div className="pr-24">
+              <div>
                 <p className="font-semibold text-lg mb-2">{address.street}</p>
                 <p className="text-gray-600">
                   {address.city}, {address.state}

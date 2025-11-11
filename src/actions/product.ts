@@ -79,6 +79,7 @@ export const getDestacadosProducts = async () => {
   const { data: products, error } = await supabase
     .from("products")
     .select("*, variants(*)")
+    .eq("highlighted", true)
     .limit(20);
 
   if (error) {
@@ -86,10 +87,15 @@ export const getDestacadosProducts = async () => {
     throw new Error(error.message);
   }
 
-  // Seleccionar 4 productos destacados
+  // Si hay menos de 4 destacados, retornar los que haya
+  // Si hay más, seleccionar 4 al azar
+  if (products.length <= 4) {
+    return products;
+  }
+
   const destacados = products
-  .sort(() => 0.5 - Math.random())
-  .slice(0, 4);
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 4);
 
   return destacados;
 };

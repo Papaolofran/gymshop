@@ -22,11 +22,10 @@ interface ProductFromDB {
   id: string;
   name: string;
   slug: string;
-  description: string;
+  features: string[];
   brand: string;
-  base_price: number;
   images: string[];
-  is_featured: boolean;
+  highlighted: boolean;
   created_at: string;
   updated_at: string;
   category?: Category;
@@ -50,7 +49,7 @@ export class ProductService {
       const total = await this.productRepository.count();
 
       return {
-        products: products.map(this.transformProduct),
+        products: products.map((p) => this.transformProduct(p)),
         pagination: {
           page: page || 1,
           limit,
@@ -104,7 +103,7 @@ export class ProductService {
 
       const products = await this.productRepository.search(searchTerm);
 
-      return products.map(this.transformProduct);
+      return products.map((p) => this.transformProduct(p));
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, 'Error al buscar productos');
@@ -116,7 +115,7 @@ export class ProductService {
     try {
       const products = await this.productRepository.filter(categoryId, brand);
 
-      return products.map(this.transformProduct);
+      return products.map((p) => this.transformProduct(p));
     } catch {
       throw new ApiError(500, 'Error al filtrar productos');
     }
@@ -127,7 +126,7 @@ export class ProductService {
     try {
       const products = await this.productRepository.findFeatured();
 
-      return products.map(this.transformProduct);
+      return products.map((p) => this.transformProduct(p));
     } catch {
       throw new ApiError(500, 'Error al obtener productos destacados');
     }
@@ -145,15 +144,20 @@ export class ProductService {
     isFeatured?: boolean;
   }) {
     try {
+      // Convertir description (string) en features (array)
+      const features = productData.description
+        .split('\n')
+        .map(f => f.trim())
+        .filter(f => f.length > 0);
+
       const product = await this.productRepository.create({
         name: productData.name,
         slug: productData.slug,
-        description: productData.description,
+        features: features,
         brand: productData.brand,
-        base_price: productData.basePrice,
         category_id: productData.categoryId,
         images: productData.images,
-        is_featured: productData.isFeatured || false
+        highlighted: productData.isFeatured || false
       });
 
       return this.transformProduct(product);
@@ -183,22 +187,26 @@ export class ProductService {
       const updateData: {
         name?: string;
         slug?: string;
-        description?: string;
+        features?: string[];
         brand?: string;
-        base_price?: number;
         category_id?: string;
         images?: string[];
-        is_featured?: boolean;
+        highlighted?: boolean;
       } = {};
 
       if (productData.name) updateData.name = productData.name;
       if (productData.slug) updateData.slug = productData.slug;
-      if (productData.description) updateData.description = productData.description;
+      if (productData.description) {
+        // Convertir description (string) en features (array)
+        updateData.features = productData.description
+          .split('\n')
+          .map(f => f.trim())
+          .filter(f => f.length > 0);
+      }
       if (productData.brand) updateData.brand = productData.brand;
-      if (productData.basePrice) updateData.base_price = productData.basePrice;
       if (productData.categoryId) updateData.category_id = productData.categoryId;
       if (productData.images) updateData.images = productData.images;
-      if (productData.isFeatured !== undefined) updateData.is_featured = productData.isFeatured;
+      if (productData.isFeatured !== undefined) updateData.highlighted = productData.isFeatured;
 
       const updatedProduct = await this.productRepository.update(id, updateData);
 
@@ -233,11 +241,11 @@ export class ProductService {
       id: product.id,
       name: product.name,
       slug: product.slug,
-      description: product.description,
+      description: product.features.join('\n'), // Convertir array a string
       brand: product.brand,
-      basePrice: product.base_price,
+      basePrice: product.variants && product.variants.length > 0 ? product.variants[0].price : 0,
       images: product.images,
-      isFeatured: product.is_featured,
+      isFeatured: product.highlighted,
       category: product.category ? {
         id: product.category.id,
         name: product.category.name,

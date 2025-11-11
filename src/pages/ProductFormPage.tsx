@@ -3,13 +3,34 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../hooks/auth/useUser';
 import { useUserProfile } from '../hooks/useUsers';
 import { useProductAdmin, useCreateProduct, useUpdateProduct } from '../hooks/useProductsAdmin';
+import { useCategories } from '../hooks/useCategories';
 import { LuLoaderCircle } from 'react-icons/lu';
+
+const BRANDS_BY_CATEGORY: Record<string, string[]> = {
+  'Suplementos': ['Ena', 'Gentech', 'Star Nutrition'],
+  'Suplemento': ['Ena', 'Gentech', 'Star Nutrition'],
+  'Ropa': ['Adidas', 'Nike', 'Under Armour']
+};
+
+// Función auxiliar para obtener marcas según categoría
+const getBrandsByCategory = (categoryName: string): string[] => {
+  // Normalizar el nombre (trim y case-insensitive)
+  const normalized = categoryName.trim();
+  
+  // Buscar exacto o con variaciones
+  return BRANDS_BY_CATEGORY[normalized] || 
+         BRANDS_BY_CATEGORY[normalized.toLowerCase()] || 
+         BRANDS_BY_CATEGORY[normalized + 's'] ||
+         BRANDS_BY_CATEGORY[normalized.slice(0, -1)] || // Quitar 's' final
+         [];
+};
 
 export const ProductFormPage = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const { session } = useUser();
   const { data: userData, isLoading: isLoadingUser } = useUserProfile();
+  const { data: categories = [], isLoading: isLoadingCategories } = useCategories();
   const isEditing = !!productId;
 
   const { data: product, isLoading: isLoadingProduct } = useProductAdmin(productId);
@@ -26,6 +47,27 @@ export const ProductFormPage = () => {
     images: [''],
     isFeatured: false
   });
+
+  // Obtener categoría seleccionada
+  const selectedCategory = categories.find(cat => cat.id === formData.categoryId);
+  const availableBrands = selectedCategory ? getBrandsByCategory(selectedCategory.name) : [];
+  
+  // Debug: Ver qué categoría está seleccionada
+  useEffect(() => {
+    if (selectedCategory) {
+      console.log('Categoría seleccionada:', selectedCategory.name);
+      console.log('Marcas disponibles:', availableBrands);
+    }
+  }, [selectedCategory, availableBrands]);
+
+  // Resetear marca cuando cambia la categoría
+  const handleCategoryChange = (categoryId: string) => {
+    setFormData({ 
+      ...formData, 
+      categoryId,
+      brand: '' // Resetear marca al cambiar categoría
+    });
+  };
 
   // Cargar datos del producto cuando está editando
   useEffect(() => {
@@ -147,17 +189,48 @@ export const ProductFormPage = () => {
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium mb-2">Categoría</label>
+          {isLoadingCategories ? (
+            <div className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-400">
+              Cargando categorías...
+            </div>
+          ) : (
+            <select
+              required
+              value={formData.categoryId}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2"
+            >
+              <option value="">Selecciona una categoría</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">Marca</label>
-            <input
-              type="text"
+            <select
               required
               value={formData.brand}
               onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2"
-              placeholder="Nike, Adidas, etc."
-            />
+              className={`w-full border border-gray-300 rounded-lg px-4 py-2 ${!formData.categoryId ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+              disabled={!formData.categoryId}
+            >
+              <option value="">
+                {!formData.categoryId ? 'Selecciona una categoría primero' : 'Selecciona una marca'}
+              </option>
+              {availableBrands.map((brand) => (
+                <option key={brand} value={brand}>
+                  {brand}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -176,19 +249,12 @@ export const ProductFormPage = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">ID de Categoría</label>
-          <input
-            type="text"
-            required
-            value={formData.categoryId}
-            onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2"
-            placeholder="ID de la categoría"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Imágenes (URLs)</label>
+          <label className="block text-sm font-medium mb-2">
+            Imágenes (URLs)
+            <span className="block text-xs text-gray-500 font-normal mt-1">
+              Por ahora usa URLs de imágenes alojadas en servicios como Imgur, Cloudinary, etc.
+            </span>
+          </label>
           {formData.images.map((image, index) => (
             <div key={index} className="flex gap-2 mb-2">
               <input
