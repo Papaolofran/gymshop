@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate, authorize } from '../middlewares/auth.js';
 import {
   getAllProducts,
+  getProductById,
   getProductBySlug,
   searchProducts,
   filterProducts,
@@ -23,6 +24,7 @@ router.get('/search', searchProducts);                                  // Busca
 router.get('/filter', filterProducts);                                  // Filtrar por categoría/marca
 router.get('/featured', getFeaturedProducts);                           // Productos destacados
 router.get('/slug/:slug', getProductBySlug);                            // Obtener por slug
+router.get('/:id', authenticate, authorize('admin'), getProductById);   // Obtener por ID (solo admin)
 
 router.post('/', authenticate, authorize('admin'), createProduct);      // Crear producto (solo admin)
 router.put('/:id', authenticate, authorize('admin'), updateProduct);    // Actualizar producto (solo admin)

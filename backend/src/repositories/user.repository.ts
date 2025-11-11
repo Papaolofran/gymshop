@@ -5,37 +5,83 @@ import { supabase } from '../config/database.js';
 export class UserRepository {
   // Obtener todos los usuarios con sus roles
   async findAll() {
-    const { data, error } = await supabase
+    // Obtener todos los usuarios
+    const { data: users, error: usersError } = await supabase
       .from('users')
-      .select('*, user_roles(role)')
+      .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data;
+    if (usersError) throw usersError;
+
+    // Obtener todos los roles
+    const { data: roles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('user_id, role');
+
+    if (rolesError) throw rolesError;
+
+    // Combinar usuarios con sus roles
+    return users.map(user => ({
+      ...user,
+      user_roles: roles?.filter(r => r.user_id === user.user_id) || []
+    }));
   }
 
   // Buscar usuario por ID de tabla users
   async findById(id: string) {
-    const { data, error } = await supabase
+    // Primero obtener el usuario
+    const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('*, user_roles(role)')
+      .select('*')
       .eq('id', id)
       .single();
 
-    if (error) throw error;
-    return data;
+    if (userError) throw userError;
+
+    // Luego obtener el rol
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userData.user_id)
+      .single();
+
+    if (roleError) {
+      console.warn('No role found for user:', userData.user_id);
+    }
+
+    return {
+      ...userData,
+      user_roles: roleData ? [roleData] : []
+    };
   }
 
   // Buscar usuario por user_id de Supabase Auth
   async findByUserId(userId: string) {
-    const { data, error } = await supabase
+    // Primero obtener el usuario
+    const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('*, user_roles(role)')
+      .select('*')
       .eq('user_id', userId)
       .single();
 
-    if (error) throw error;
-    return data;
+    if (userError) throw userError;
+
+    // Luego obtener el rol
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .single();
+
+    if (roleError) {
+      // Si no hay rol, continuar con rol por defecto
+      console.warn('No role found for user:', userId);
+    }
+
+    return {
+      ...userData,
+      user_roles: roleData ? [roleData] : []
+    };
   }
 
   // Actualizar datos del usuario

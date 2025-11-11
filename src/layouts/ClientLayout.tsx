@@ -4,9 +4,11 @@ import { useUser } from '../hooks';
 import { useEffect } from 'react';
 import { supabase } from '../supabase/client';
 import { Loader } from '../components/shared/Loader';
+import { useUserProfile } from '../hooks/useUsers';
 
 export const ClientLayout = () => {
-	const { session, isLoading: isLoadingSession } = useUser();
+	const { isLoading: isLoadingSession } = useUser();
+	const { data: userData } = useUserProfile();
 
 	const navigate = useNavigate();
 
@@ -27,25 +29,68 @@ export const ClientLayout = () => {
 	};
 
 	return (
-		<div className='flex flex-col gap-5'>
-			{/* Menú */}
-			<nav className='flex justify-center gap-10 text-sm font-medium'>
-				<NavLink
-					to='/account/pedidos'
-					className={({ isActive }) =>
-						`${isActive ? 'underline' : 'hover:underline'}`
-					}
-				>
-					Pedidos
-				</NavLink>
-				{/* TODO: LINK DASHBOARD */}
+		<div className='flex flex-col min-h-screen'>
+			{/* Menú de cuenta del usuario */}
+			<div className='bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200'>
+				<nav className='container mx-auto px-4 py-4 sm:py-6'>
+					<div className='grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4'>
+						<NavLink
+							to='/account/perfil'
+							className={({ isActive }) =>
+								`px-4 sm:px-6 py-2.5 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 text-center ${
+									isActive 
+										? 'bg-cyan-600 text-white shadow-md' 
+										: 'bg-white text-slate-700 hover:bg-slate-200 hover:shadow-sm'
+								}`
+							}
+						>
+							Mi Perfil
+						</NavLink>
+						<NavLink
+							to='/account/pedidos'
+							className={({ isActive }) =>
+								`px-4 sm:px-6 py-2.5 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 text-center ${
+									isActive 
+										? 'bg-cyan-600 text-white shadow-md' 
+										: 'bg-white text-slate-700 hover:bg-slate-200 hover:shadow-sm'
+								}`
+							}
+						>
+							Mis Pedidos
+						</NavLink>
+						<NavLink
+							to='/account/direcciones'
+							className={({ isActive }) =>
+								`px-4 sm:px-6 py-2.5 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 text-center ${
+									isActive 
+										? 'bg-cyan-600 text-white shadow-md' 
+										: 'bg-white text-slate-700 hover:bg-slate-200 hover:shadow-sm'
+								}`
+							}
+						>
+							Direcciones
+						</NavLink>
+						
+						{userData?.role === 'admin' && (
+							<NavLink
+								to='/admin/products'
+								className='px-4 sm:px-6 py-2.5 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:shadow-lg hover:from-purple-700 hover:to-indigo-700'
+							>
+								Panel Admin
+							</NavLink>
+						)}
+						
+						<button 
+							className='px-4 sm:px-6 py-2.5 rounded-lg font-medium text-xs sm:text-sm bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-200 hover:shadow-md text-center col-span-2 sm:col-span-1'
+							onClick={handleLogout}
+						>
+							Cerrar Sesión
+						</button>
+					</div>
+				</nav>
+			</div>
 
-				<button className='hover:underline' onClick={handleLogout}>
-					Cerrar sesión
-				</button>
-			</nav>
-
-			<main className='container mt-12 flex-1'>
+			<main className='container mx-auto px-4 py-6 sm:py-8 flex-1'>
 				<Outlet />
 			</main>
 		</div>

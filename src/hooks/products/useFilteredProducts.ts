@@ -4,13 +4,15 @@ import { getFilteredProducts } from "../../actions";
 export const useFilteredProducts = ({
   page,
   brands,
+  categories,
 }: {
   page: number;
   brands: string[];
+  categories: string[];
 }) => {
   const { data, isLoading } = useQuery({
-    queryKey: ["filteredProducts", page, brands],
-    queryFn: () => getFilteredProducts({ page, brands }),
+    queryKey: ["filteredProducts", page, brands, categories],
+    queryFn: () => getFilteredProducts({ page, brands, categories }),
     retry: false,    
     
   });

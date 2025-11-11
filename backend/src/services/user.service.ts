@@ -54,6 +54,31 @@ export class UserService {
     }
   }
 
+  // Obtener un usuario por user_id de Supabase Auth
+  async getUserByAuthId(userId: string) {
+    try {
+      const user = await this.userRepository.findByUserId(userId);
+
+      if (!user) {
+        throw new ApiError(404, 'Usuario no encontrado');
+      }
+
+      return {
+        id: user.id,
+        userId: user.user_id,
+        email: user.email,
+        fullName: user.full_name,
+        phone: user.phone,
+        role: user.user_roles?.[0]?.role || 'customer',
+        createdAt: user.created_at,
+        updatedAt: user.updated_at
+      };
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(500, 'Error al obtener usuario');
+    }
+  }
+
   // Actualizar datos del usuario
   // Solo puede actualizar su propio perfil
   async updateUser(id: string, userId: string, updateData: {

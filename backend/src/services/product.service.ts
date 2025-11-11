@@ -63,6 +63,22 @@ export class ProductService {
     }
   }
 
+  // Obtener un producto por ID
+  async getProductById(id: string) {
+    try {
+      const product = await this.productRepository.findById(id);
+
+      if (!product) {
+        throw new ApiError(404, 'Producto no encontrado');
+      }
+
+      return this.transformProduct(product);
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(500, 'Error al obtener producto');
+    }
+  }
+
   // Obtener un producto por slug
   async getProductBySlug(slug: string) {
     try {

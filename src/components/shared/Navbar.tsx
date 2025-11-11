@@ -21,8 +21,6 @@ export const Navbar = () => {
 
   const { session, isLoading } = useUser();
 
-  const userId = session?.user.id;
-
   return (
     <header className="bg-white text-black py-4 flex items-center justify-between px-5 border-b border-slate-200 lg:px-12">
       <Logo/>
@@ -50,19 +48,20 @@ export const Navbar = () => {
 
         {
           isLoading ? (
-            <LuLoaderCircle className="animate-spin" size={60}/>
+            <LuLoaderCircle className="animate-spin" size={25}/>
           ) : session ? (
-            <div className="relative">
-              {/*User Nav*/}
+            <div className="relative group">
+              {/*User Avatar*/}
               <Link
                 to="/account"
-                className="border 2 border-slate-700 w-9 h-9 rounded-full grid place-items-center text-lg font-bold cursor-pointer"
+                className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 grid place-items-center text-white text-sm font-semibold cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105"
+                title="Mi cuenta"
               >
-                R
+                <HiOutlineUser size={20}/>
               </Link>
             </div>
           ) : (
-            <Link to="/login">
+            <Link to="/login" className="hover:text-cyan-600 transition-colors">
               <HiOutlineUser size={25}/>
             </Link>
           )

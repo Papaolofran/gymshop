@@ -3,6 +3,7 @@ import { authenticate, authorize } from '../middlewares/auth.js';
 import {
   getAllUsers,
   getUserById,
+  getUserProfile,
   updateUser,
   deleteUser,
   updateUserRole
@@ -16,6 +17,7 @@ const router = Router();
 // authorize: verifica que el usuario tenga el rol necesario
 
 router.get('/', authenticate, authorize('admin'), getAllUsers);               // Listar todos (solo admin)
+router.get('/profile', authenticate, getUserProfile);                         // Obtener perfil del usuario autenticado
 router.get('/:id', authenticate, getUserById);                                // Obtener uno
 router.put('/:id', authenticate, updateUser);                                 // Actualizar perfil
 router.delete('/:id', authenticate, authorize('admin'), deleteUser);          // Eliminar (solo admin)

@@ -30,11 +30,13 @@ export class VariantRepository {
   // Crear nueva variante
   async create(variantData: {
     product_id: string;
-    sku: string;
-    attributes: Record<string, string>;
     price: number;
     stock: number;
-    is_active?: boolean;
+    color?: string;
+    color_name?: string;
+    size?: string;
+    flavor?: string;
+    weight?: string;
   }) {
     const { data, error } = await supabase
       .from('variants')
@@ -48,13 +50,15 @@ export class VariantRepository {
 
   // Actualizar variante
   async update(id: string, variantData: {
-    sku?: string;
-    attributes?: Record<string, string>;
     price?: number;
     stock?: number;
-    is_active?: boolean;
+    color?: string;
+    color_name?: string;
+    size?: string;
+    flavor?: string;
+    weight?: string;
   }) {
-    const { data, error } = await supabase
+    const { data, error} = await supabase
       .from('variants')
       .update(variantData)
       .eq('id', id)
@@ -74,18 +78,6 @@ export class VariantRepository {
 
     if (error) throw error;
     return true;
-  }
-
-  // Verificar si existe una variante con el mismo SKU
-  async findBySku(sku: string) {
-    const { data, error } = await supabase
-      .from('variants')
-      .select('*')
-      .eq('sku', sku)
-      .single();
-
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
   }
 
   // Actualizar stock de una variante

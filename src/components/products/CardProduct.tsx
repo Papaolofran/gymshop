@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { VariantProduct } from "../../interfaces";
 import { formatPrice } from "../../helpers";
@@ -15,20 +14,11 @@ interface Props {
     variants: VariantProduct[];
 }
 
-export const CardProduct = ({img, name, price, slug, colors, variants}: Props) => {
+export const CardProduct = ({img, name, price, slug, variants}: Props) => {
     const navigate = useNavigate();
 
-    const [activeColor, setActiveColor] = useState<{
-      name: string;
-      color: string
-    }>(colors[0]);
-
-    // Indentificar la variante seleccionada según el color activo
-    const selectedVariant = variants.find(
-      variant => variant.color === activeColor.color
-    );
-
-    const stock = selectedVariant?.stock || 0;
+    // Calcular stock total de todas las variantes
+    const stock = variants.reduce((total, variant) => total + variant.stock, 0);
 
     // Manejar click en producto
     const handleProductClick = (e: React.MouseEvent) => {
@@ -53,63 +43,40 @@ export const CardProduct = ({img, name, price, slug, colors, variants}: Props) =
     };
 
     return (
-      <div className="flex flex-col gap-6 relative">
+      <div className="flex flex-col gap-3 sm:gap-4 relative group">
         <div 
           onClick={handleProductClick}
-          className={`flex relative group overflow-hidden rounded-lg bg-gray-100 ${
-            stock === 0 ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
+          className={`relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 transition-all duration-300 ${
+            stock === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:shadow-lg hover:border-cyan-300'
           }`}
         >
-          <div className="flex w-full aspect-square items-center justify-center p-4 overflow-hidden">
+          <div className="flex w-full aspect-square items-center justify-center p-3 sm:p-4 overflow-hidden">
             {img ? (
               <img 
                 src={img} 
                 alt={name} 
-                className="object-contain w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-110"
+                className="object-contain w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-105"
               />
             ) : (
               <div className="flex flex-col items-center justify-center text-gray-400">
-                <HiPhoto size={80} className="transition-transform duration-300 ease-in-out group-hover:scale-110" />
-                <p className="text-sm mt-2">Sin imagen</p>
+                <HiPhoto size={60} className="sm:w-20 sm:h-20 transition-transform duration-300 ease-in-out group-hover:scale-105" />
+                <p className="text-xs sm:text-sm mt-2">Sin imagen</p>
               </div>
             )}
           </div>
-        </div>
-
-        <div className="flex flex-col gap-1 items-center">
-          <p className="text-[15px] font-medium">{name}</p>
-          <p className="text-[15px] font-medium">{formatPrice(price)}</p>
-
-          <div className="flex gap-3 mt-3">
-            {colors.map((color) => (
-              <button 
-                key={color.color}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevenir navegación al producto
-                  setActiveColor(color);
-                }}
-                className={`p-0.5 rounded-full cursor-pointer transition-all ${
-                  activeColor.color === color.color 
-                    ? 'ring-2 ring-black' 
-                    : 'hover:scale-110'
-                }`}
-                title={color.name}
-              >
-                <span 
-                  className={`block w-4 h-4 rounded-full transition-all ${
-                    activeColor.color === color.color
-                      ? 'border-2 border-gray-800'
-                      : 'border border-gray-400'
-                  }`}
-                  style={{backgroundColor: color.color}}
-                />
-              </button>
-            ))}
+          
+          <div className="absolute top-2 left-2">
+            {stock === 0 && <Tag contentTag="Agotado"/>}
           </div>
         </div>
 
-        <div className="absolute top-2 left-2">
-          {stock === 0 && <Tag contentTag="Agotado"/>}
+        <div className="flex flex-col gap-1 items-center text-center px-1 sm:px-2">
+          <h3 className="text-xs sm:text-sm md:text-base font-medium text-slate-800 line-clamp-2 min-h-[2.5rem] sm:min-h-[3rem]">
+            {name}
+          </h3>
+          <p className="text-sm sm:text-base md:text-lg font-bold text-cyan-600">
+            {formatPrice(price)}
+          </p>
         </div>
       </div>
     );

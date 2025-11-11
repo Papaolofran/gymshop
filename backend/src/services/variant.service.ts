@@ -6,13 +6,13 @@ import { ApiError } from '../middlewares/errorHandler.js';
 interface VariantFromDB {
   id: string;
   product_id: string;
-  sku: string;
-  attributes: Record<string, string>;
   price: number;
   stock: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  color?: string | null;
+  color_name?: string | null;
+  size?: string | null;
+  flavor?: string | null;
+  weight?: string | null;
 }
 
 // Service: Capa de lógica de negocio para variantes
@@ -66,11 +66,13 @@ export class VariantService {
 
   // Crear nueva variante (solo admin)
   async createVariant(productId: string, variantData: {
-    sku: string;
-    attributes: Record<string, string>;
     price: number;
     stock: number;
-    isActive?: boolean;
+    color?: string;
+    colorName?: string;
+    size?: string;
+    flavor?: string;
+    weight?: string;
   }) {
     try {
       const product = await this.productRepository.findById(productId);
@@ -79,19 +81,15 @@ export class VariantService {
         throw new ApiError(404, 'Producto no encontrado');
       }
 
-      const existingSku = await this.variantRepository.findBySku(variantData.sku);
-
-      if (existingSku) {
-        throw new ApiError(400, 'Ya existe una variante con este SKU');
-      }
-
       const variant = await this.variantRepository.create({
         product_id: productId,
-        sku: variantData.sku,
-        attributes: variantData.attributes,
         price: variantData.price,
         stock: variantData.stock,
-        is_active: variantData.isActive ?? true
+        color: variantData.color,
+        color_name: variantData.colorName,
+        size: variantData.size,
+        flavor: variantData.flavor,
+        weight: variantData.weight
       });
 
       return this.transformVariant(variant);
@@ -103,11 +101,13 @@ export class VariantService {
 
   // Actualizar variante (solo admin)
   async updateVariant(id: string, productId: string, variantData: {
-    sku?: string;
-    attributes?: Record<string, string>;
     price?: number;
     stock?: number;
-    isActive?: boolean;
+    color?: string;
+    colorName?: string;
+    size?: string;
+    flavor?: string;
+    weight?: string;
   }) {
     try {
       const variant = await this.variantRepository.findById(id);
@@ -120,27 +120,23 @@ export class VariantService {
         throw new ApiError(400, 'La variante no pertenece a este producto');
       }
 
-      if (variantData.sku && variantData.sku !== variant.sku) {
-        const existingSku = await this.variantRepository.findBySku(variantData.sku);
-        
-        if (existingSku) {
-          throw new ApiError(400, 'Ya existe una variante con este SKU');
-        }
-      }
-
       const updateData: {
-        sku?: string;
-        attributes?: Record<string, string>;
         price?: number;
         stock?: number;
-        is_active?: boolean;
+        color?: string;
+        color_name?: string;
+        size?: string;
+        flavor?: string;
+        weight?: string;
       } = {};
 
-      if (variantData.sku) updateData.sku = variantData.sku;
-      if (variantData.attributes) updateData.attributes = variantData.attributes;
       if (variantData.price !== undefined) updateData.price = variantData.price;
       if (variantData.stock !== undefined) updateData.stock = variantData.stock;
-      if (variantData.isActive !== undefined) updateData.is_active = variantData.isActive;
+      if (variantData.color !== undefined) updateData.color = variantData.color;
+      if (variantData.colorName !== undefined) updateData.color_name = variantData.colorName;
+      if (variantData.size !== undefined) updateData.size = variantData.size;
+      if (variantData.flavor !== undefined) updateData.flavor = variantData.flavor;
+      if (variantData.weight !== undefined) updateData.weight = variantData.weight;
 
       const updatedVariant = await this.variantRepository.update(id, updateData);
 
@@ -178,13 +174,13 @@ export class VariantService {
     return {
       id: variant.id,
       productId: variant.product_id,
-      sku: variant.sku,
-      attributes: variant.attributes,
       price: variant.price,
       stock: variant.stock,
-      isActive: variant.is_active,
-      createdAt: variant.created_at,
-      updatedAt: variant.updated_at
+      color: variant.color,
+      colorName: variant.color_name,
+      size: variant.size,
+      flavor: variant.flavor,
+      weight: variant.weight
     };
   }
 }

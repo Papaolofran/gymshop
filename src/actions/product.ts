@@ -17,9 +17,11 @@ export const getProducts = async () => {
 export const getFilteredProducts = async ({
   page = 1,
   brands = [],
+  categories = [],
 }: {
   page: number;
   brands: string[];
+  categories: string[];
 }) => {
   const itemsPerPage = 10;
   const from = (page - 1) * itemsPerPage;
@@ -27,12 +29,25 @@ export const getFilteredProducts = async ({
 
   let query = supabase
     .from("products")
-    .select("*, variants(*)", { count: "exact" })
+    .select("*, variants(*), categories(name)", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, to);
 
   if (brands.length > 0) {
     query = query.in("brand", brands);
+  }
+
+  if (categories.length > 0) {
+    // Primero obtener los IDs de las categorías por nombre
+    const { data: categoriesData } = await supabase
+      .from("categories")
+      .select("id")
+      .in("name", categories);
+    
+    if (categoriesData && categoriesData.length > 0) {
+      const categoryIds = categoriesData.map(c => c.id);
+      query = query.in("category_id", categoryIds);
+    }
   }
 
   const { data, error, count } = await query;

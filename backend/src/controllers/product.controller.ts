@@ -90,6 +90,18 @@ export const createProduct = async (req: Request, res: Response) => {
   });
 };
 
+// GET /api/products/:id - Obtener producto por ID (solo admin)
+export const getProductById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const product = await productService.getProductById(id);
+
+  res.json({
+    success: true,
+    data: product
+  });
+};
+
 // PUT /api/products/:id - Actualizar producto (solo admin)
 export const updateProduct = async (req: Request, res: Response) => {
   const { id } = req.params;

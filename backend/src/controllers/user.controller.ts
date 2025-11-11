@@ -17,6 +17,20 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
   });
 };
 
+// GET /api/users/profile - Obtener perfil del usuario autenticado
+export const getUserProfile = async (req: AuthRequest, res: Response) => {
+  if (!req.user) {
+    throw new ApiError(401, 'Usuario no autenticado');
+  }
+
+  const user = await userService.getUserByAuthId(req.user.id);
+
+  res.json({
+    success: true,
+    data: user
+  });
+};
+
 // GET /api/users/:id - Obtener un usuario por ID
 export const getUserById = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
