@@ -163,14 +163,54 @@ export class ProductRepository {
     return data;
   }
 
-  // Eliminar producto
+  // Eliminar producto y todas sus variantes
   async delete(id: string) {
-    const { error } = await supabase
+    // 1. Primero verificamos si el producto existe
+    const { data: product, error: findError } = await supabase
       .from('products')
-      .delete()
-      .eq('id', id);
+      .select('id')
+      .eq('id', id)
+      .single();
 
-    if (error) throw error;
-    return true;
+    if (findError) {
+      console.error('Error al buscar producto:', findError);
+      throw findError;
+    }
+
+    if (!product) {
+      console.error('Producto no encontrado con ID:', id);
+      throw new Error('Producto no encontrado');
+    }
+
+    try {
+      // 2. Eliminamos todas las variantes del producto primero
+      console.log(`Eliminando variantes del producto ${id}...`);
+      const { error: variantsError } = await supabase
+        .from('variants')
+        .delete()
+        .eq('product_id', id);
+
+      if (variantsError) {
+        console.error('Error al eliminar variantes:', variantsError);
+        throw variantsError;
+      }
+
+      // 3. Luego eliminamos el producto
+      console.log(`Eliminando producto ${id}...`);
+      const { error: productError } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+      if (productError) {
+        console.error('Error al eliminar producto:', productError);
+        throw productError;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error al eliminar producto y sus variantes:', error);
+      throw error;
+    }
   }
 }

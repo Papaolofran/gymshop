@@ -20,7 +20,8 @@ router.get('/', authenticate, authorize('admin'), getAllUsers);               //
 router.get('/profile', authenticate, getUserProfile);                         // Obtener perfil del usuario autenticado
 router.get('/:id', authenticate, getUserById);                                // Obtener uno
 router.put('/:id', authenticate, updateUser);                                 // Actualizar perfil
-router.delete('/:id', authenticate, authorize('admin'), deleteUser);          // Eliminar (solo admin)
+router.delete('/:id', authenticate, authorize('admin'), deleteUser);          // Eliminar usuario como admin
+router.delete('/delete-account/:id', authenticate, deleteUser);               // Eliminar cuenta propia
 router.put('/:userId/role', authenticate, authorize('admin'), updateUserRole);// Cambiar rol (solo admin)
 
 // Rutas anidadas de direcciones

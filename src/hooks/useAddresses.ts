@@ -58,13 +58,54 @@ export const useDeleteAddress = (userId: string) => {
 
   return useMutation({
     mutationFn: (addressId: string) => deleteAddress(userId, addressId),
+    retry: 1, // Intentar una vez más si falla
     onSuccess: () => {
-      toast.success('Dirección eliminada exitosamente');
+      toast.success('Dirección eliminada exitosamente', { duration: 3000 });
+      // Invalidar la cache para forzar una recarga de las direcciones
       queryClient.invalidateQueries({ queryKey: ['addresses', userId] });
     },
-    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
-      const message = error.response?.data?.message || 'Error al eliminar dirección';
-      toast.error(message);
+    onError: (error: Error) => {
+      console.error('Error en hook de eliminar dirección:', error);
+      
+      // Determinar el mensaje de error adecuado
+      let errorMessage = 'Error al eliminar dirección';
+      
+      if (error.message.includes('asociada a una o más órdenes')) {
+        // Mensaje especial para direcciones usadas en órdenes
+        errorMessage = error.message;
+        toast.error(errorMessage, {
+          duration: 5000,
+          style: {
+            borderRadius: '10px',
+            background: '#FEF2F2',
+            color: '#B91C1C',
+            padding: '12px',
+            fontWeight: '500'
+          }
+        });
+      } else if (error.message.includes('conexión')) {
+        errorMessage = 'Error de conexión. Verifica que el backend esté en ejecución.';
+        
+        // Intentar recargar la página después de un tiempo
+        toast.error(errorMessage, {
+          duration: 5000,
+          style: {
+            borderRadius: '10px',
+            background: '#FEF2F2',
+            color: '#B91C1C',
+            padding: '12px'
+          }
+        });
+        
+        // Mensaje adicional con sugerencia
+        setTimeout(() => {
+          toast.error('Verifica que el servidor backend esté funcionando. Intenta reiniciar la aplicación.', {
+            duration: 7000
+          });
+        }, 1000);
+      } else {
+        toast.error(errorMessage);
+      }
     }
   });
 };

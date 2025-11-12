@@ -1,9 +1,10 @@
 import { Navigate, useParams } from 'react-router-dom';
 import { useUser } from '../hooks/auth/useUser';
-import { useOrderById } from '../hooks/useOrders';
+import { useOrderById, useCancelOrder } from '../hooks/useOrders';
 import { formatPrice } from '../helpers';
-import { LuLoaderCircle, LuPackage } from 'react-icons/lu';
+import { LuLoaderCircle, LuPackage, LuX } from 'react-icons/lu';
 import { HiPhoto } from 'react-icons/hi2';
+import { useState } from 'react';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -25,6 +26,19 @@ export const OrderDetailPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const { session } = useUser();
   const { data: order, isLoading, isError } = useOrderById(orderId || '');
+  const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder();
+  const [showConfirmCancel, setShowConfirmCancel] = useState(false);
+  
+  // Function to handle order cancellation
+  const handleCancelOrder = () => {
+    if (!orderId) return;
+    
+    cancelOrder(orderId, {
+      onSuccess: () => {
+        setShowConfirmCancel(false);
+      }
+    });
+  };
 
   if (!session) {
     return <Navigate to="/login" />;
@@ -65,9 +79,23 @@ export const OrderDetailPage = () => {
               })}
             </p>
           </div>
-          <span className={`px-4 py-2 rounded-full text-sm font-medium ${statusColors[order.status]}`}>
-            {statusLabels[order.status]}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className={`px-4 py-2 rounded-full text-sm font-medium ${statusColors[order.status]}`}>
+              {statusLabels[order.status]}
+            </span>
+            
+            {/* Show cancel button only if order is in pending or processing state */}
+            {['pending', 'processing'].includes(order.status) && (
+              <button
+                onClick={() => setShowConfirmCancel(true)}
+                className="bg-red-50 text-red-600 px-4 py-2 rounded-full text-sm font-medium hover:bg-red-100 transition-colors flex items-center gap-1"
+                disabled={isCancelling}
+              >
+                <LuX size={16} />
+                {isCancelling ? 'Cancelando...' : 'Cancelar Orden'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -190,6 +218,33 @@ export const OrderDetailPage = () => {
           </div>
         </div>
       </div>
+      {/* Confirmation Dialog */}
+      {showConfirmCancel && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold mb-4">¿Cancelar esta orden?</h3>
+            <p className="mb-6 text-gray-600">
+              ¿Estás seguro que deseas cancelar la orden #{order.id}? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowConfirmCancel(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                disabled={isCancelling}
+              >
+                No, mantener orden
+              </button>
+              <button
+                onClick={handleCancelOrder}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-1"
+                disabled={isCancelling}
+              >
+                {isCancelling ? 'Cancelando...' : 'Sí, cancelar orden'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

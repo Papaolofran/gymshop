@@ -42,7 +42,7 @@ export const getAddressById = async (req: AuthRequest, res: Response) => {
 // POST /api/users/:userId/addresses - Crear dirección
 export const createAddress = async (req: AuthRequest, res: Response) => {
   const { userId } = req.params;
-  const { street, city, state, postalCode, country, isDefault } = req.body;
+  const { street, addressLine2, city, state, postalCode, country, isDefault } = req.body;
 
   if (!req.user) {
     throw new ApiError(401, 'Usuario no autenticado');
@@ -50,6 +50,7 @@ export const createAddress = async (req: AuthRequest, res: Response) => {
 
   const address = await addressService.createAddress(userId, req.user.id, {
     street,
+    addressLine2,
     city,
     state,
     postalCode,
@@ -67,7 +68,7 @@ export const createAddress = async (req: AuthRequest, res: Response) => {
 // PUT /api/users/:userId/addresses/:id - Actualizar dirección
 export const updateAddress = async (req: AuthRequest, res: Response) => {
   const { userId, id } = req.params;
-  const { street, city, state, postalCode, country, isDefault } = req.body;
+  const { street, addressLine2, city, state, postalCode, country, isDefault } = req.body;
 
   if (!req.user) {
     throw new ApiError(401, 'Usuario no autenticado');
@@ -75,6 +76,7 @@ export const updateAddress = async (req: AuthRequest, res: Response) => {
 
   const address = await addressService.updateAddress(id, userId, req.user.id, {
     street,
+    addressLine2,
     city,
     state,
     postalCode,

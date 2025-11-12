@@ -60,7 +60,11 @@ export const useDeleteVariant = (productId: string) => {
     mutationFn: (variantId: string) => deleteVariant(productId, variantId),
     onSuccess: () => {
       toast.success('Variante eliminada exitosamente');
+      // Invalidate both variant and product queries to ensure all data is refreshed
       queryClient.invalidateQueries({ queryKey: ['variants', productId] });
+      queryClient.invalidateQueries({ queryKey: ['product', productId] });
+      queryClient.invalidateQueries({ queryKey: ['product-admin', productId] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
     },
     onError: (error: Error & { response?: { data?: { message?: string } } }) => {
       const message = error.response?.data?.message || 'Error al eliminar variante';

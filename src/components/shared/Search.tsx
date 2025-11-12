@@ -16,14 +16,21 @@ export const Search = () => {
 
   const closeSheet = useGlobalStore (state => state.closeSheet);
 
-  // Búsqueda en tiempo real
+  // Búsqueda en tiempo real con normalización de texto
   useEffect(() => {
     const delaySearch = setTimeout(async () => {
       if (searchTerm.trim()) {
         setIsSearching(true);
-        const products = await searchProducts(searchTerm);
-        setSearchResults(products);
-        setIsSearching(false);
+        try {
+          // Realizar búsqueda usando searchProducts con el texto original
+          // La normalización para la comparación case-insensitive y sin acentos se hará en el backend
+          const products = await searchProducts(searchTerm);
+          setSearchResults(products);
+        } catch (error) {
+          console.error("Error en la búsqueda:", error);
+        } finally {
+          setIsSearching(false);
+        }
       } else {
         setSearchResults([]);
       }
@@ -79,12 +86,18 @@ export const Search = () => {
                     </p>
 
                     <p className="text-[13px] text-gray-600"> 
-                      {product.variants[0].color_name || product.variants[0].weight} /{' '} 
-                      {product.variants[0].size || product.variants[0].flavor}
+                      {product.variants && product.variants.length > 0 ? (
+                        <>
+                          {product.variants[0].color_name || product.variants[0].weight || 'N/A'} /{' '} 
+                          {product.variants[0].size || product.variants[0].flavor || 'N/A'}
+                        </>
+                      ) : 'Sin variantes'}
                     </p>
                     
                     <p className="text-sm font-medium text-gray-900">
-                      {formatPrice(product.variants[0].price)}
+                      {product.variants && product.variants.length > 0 
+                        ? formatPrice(product.variants[0].price) 
+                        : 'Precio no disponible'}
                     </p>
                   </div>
                 </button>

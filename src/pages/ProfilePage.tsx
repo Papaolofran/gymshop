@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useUser } from '../hooks/auth/useUser';
-import { useUserProfile, useUpdateUser } from '../hooks/useUsers';
-import { LuLoaderCircle, LuUser, LuMail, LuPhone } from 'react-icons/lu';
+import { useUserProfile, useUpdateUser, useDeleteOwnAccount } from '../hooks/useUsers';
+import { LuLoaderCircle, LuUser, LuMail, LuPhone, LuTriangle } from 'react-icons/lu';
+import { signOut } from '../actions/auth';
 
 export const ProfilePage = () => {
   const { session } = useUser();
   const { data: userData, isLoading: loadingUser } = useUserProfile();
   const { mutate: updateUser, isPending } = useUpdateUser();
+  const { mutate: deleteAccount, isPending: isDeleting } = useDeleteOwnAccount();
   
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     phone: ''
@@ -17,6 +20,26 @@ export const ProfilePage = () => {
 
   useEffect(() => {
     if (userData) {
+      // Detectar si la cuenta ha sido eliminada (indicador: nombre = "[Usuario eliminado]")
+      if (userData.fullName === '[Usuario eliminado]') {
+        console.log('Cuenta eliminada detectada, cerrando sesión...');
+        // Cerrar sesión automáticamente y redirigir
+        signOut()
+          .then(() => {
+            // Limpiar datos de localStorage/sessionStorage
+            localStorage.clear();
+            sessionStorage.clear();
+            // Redirigir a la página de inicio
+            window.location.href = '/';
+          })
+          .catch(err => {
+            console.error('Error al cerrar sesión:', err);
+            // Intentar redirigir de todos modos
+            window.location.href = '/';
+          });
+        return;
+      }
+
       setFormData({
         fullName: userData.fullName,
         phone: userData.phone || ''
@@ -190,6 +213,70 @@ export const ProfilePage = () => {
           </form>
         )}
       </div>
+      
+      {/* Zona de peligro - Solo mostrar si el usuario no es admin */}
+      {userData && userData.role !== 'admin' && (
+        <div className="mt-8 border border-red-200 rounded-xl p-5 sm:p-8 bg-red-50">
+          <h2 className="text-lg sm:text-xl font-bold text-red-700 mb-4 flex items-center gap-2">
+            <LuTriangle />
+            Zona de Peligro
+          </h2>
+          
+          <p className="text-sm sm:text-base text-red-600 mb-6">
+            Las acciones en esta sección son permanentes y no se pueden deshacer.
+          </p>
+          
+          <div>
+            <h3 className="font-semibold text-sm sm:text-base mb-2 text-red-800">
+              Eliminar mi cuenta
+            </h3>
+            <p className="text-xs sm:text-sm text-red-600 mb-4">
+              Al eliminar tu cuenta, TODOS tus datos personales, pedidos, direcciones y cualquier otra información relacionada serán permanentemente borrados del sistema. Esta acción no puede deshacerse.
+            </p>
+            
+            {!showDeleteConfirm ? (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm"
+              >
+                Eliminar mi cuenta
+              </button>
+            ) : (
+              <div className="bg-red-100 border border-red-300 p-4 rounded-lg">
+                <p className="font-semibold text-red-800 mb-3">
+                  ¿Estás seguro que deseas eliminar tu cuenta?
+                </p>
+                <p className="text-xs sm:text-sm text-red-700 mb-4">
+                  Esta acción es permanente y no se puede deshacer. TODOS tus datos, incluyendo pedidos, direcciones e información personal serán eliminados permanentemente.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => deleteAccount()}
+                    disabled={isDeleting}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium text-sm flex items-center gap-2"
+                  >
+                    {isDeleting ? (
+                      <>
+                        <LuLoaderCircle className="animate-spin" size={16} />
+                        <span>Eliminando...</span>
+                      </>
+                    ) : (
+                      'Sí, eliminar mi cuenta'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={isDeleting}
+                    className="border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

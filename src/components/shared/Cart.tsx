@@ -6,6 +6,7 @@ import { RiSecurePaymentLine } from "react-icons/ri";
 import { CartItem } from "./CartItem.tsx";
 import { useCartStore } from "../../store/cart.store.ts";
 import { formatPrice } from "../../helpers";
+import { useModalStore } from "../../store/modal.store";
 
 export const Cart = () => {
   const closeSheet = useGlobalStore(state => state.closeSheet);
@@ -73,9 +74,14 @@ export const Cart = () => {
 
           <button 
             onClick={() => {
-              if (window.confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
-                clearCart();
-              }
+              useModalStore.getState().openConfirmModal({
+                title: "Limpiar carrito",
+                message: "¿Estás seguro de que quieres vaciar el carrito?",
+                onConfirm: () => {
+                  clearCart();
+                  useModalStore.getState().closeConfirmModal();
+                }
+              });
             }}
             className="mt-3 w-full text-black border border-black rounded-full py-3 hover:bg-gray-100 transition-colors"
           >

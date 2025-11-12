@@ -22,7 +22,7 @@ export const Navbar = () => {
   const { session, isLoading } = useUser();
 
   return (
-    <header className="bg-white text-black py-4 flex items-center justify-between px-5 border-b border-slate-200 lg:px-12">
+    <header className="bg-white text-black py-4 flex items-center justify-between px-5 border-b border-slate-200 lg:px-12 fixed top-0 left-0 right-0 z-50 shadow-sm">
       <Logo/>
       
       <nav className="space-x-5 hidden md:flex">

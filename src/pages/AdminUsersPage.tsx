@@ -3,6 +3,8 @@ import { Navigate } from 'react-router-dom';
 import { useUser } from '../hooks/auth/useUser';
 import { useAllUsers, useDeleteUser, useUpdateUserRole, useUserProfile } from '../hooks/useUsers';
 import { LuLoaderCircle, LuTrash2, LuShield, LuUser } from 'react-icons/lu';
+import { useModalStore } from '../store/modal.store';
+import toast from 'react-hot-toast';
 
 export const AdminUsersPage = () => {
   const { session } = useUser();
@@ -32,33 +34,45 @@ export const AdminUsersPage = () => {
 
   const handleDeleteUser = (userId: string, userName: string) => {
     if (userId === session.user.id) {
-      alert('No puedes eliminarte a ti mismo');
+      toast.error('No puedes eliminarte a ti mismo');
       return;
     }
 
-    if (confirm(`¿Estás seguro de eliminar al usuario "${userName}"?`)) {
-      deleteUser(userId);
-    }
+    useModalStore.getState().openConfirmModal({
+      title: "Eliminar usuario",
+      message: `¿Estás seguro de eliminar al usuario "${userName}"?`,
+      onConfirm: () => {
+        deleteUser(userId);
+        useModalStore.getState().closeConfirmModal();
+      }
+    });
   };
 
   const handleChangeRole = (userId: string, currentRole: string, userName: string) => {
     if (userId === session.user.id) {
-      alert('No puedes cambiar tu propio rol');
+      toast.error('No puedes cambiar tu propio rol');
       return;
     }
 
     const newRole = currentRole === 'admin' ? 'customer' : 'admin';
     const roleText = newRole === 'admin' ? 'Administrador' : 'Cliente';
 
-    if (confirm(`¿Cambiar rol de "${userName}" a ${roleText}?`)) {
-      setSelectedUser(userId);
-      updateRole(
-        { userId, role: newRole },
-        {
-          onSettled: () => setSelectedUser(null)
-        }
-      );
-    }
+    useModalStore.getState().openConfirmModal({
+      title: "Cambiar rol de usuario",
+      message: `¿Cambiar rol de "${userName}" a ${roleText}?`,
+      onConfirm: () => {
+        setSelectedUser(userId);
+        updateRole(
+          { userId, role: newRole },
+          {
+            onSettled: () => {
+              setSelectedUser(null);
+              useModalStore.getState().closeConfirmModal();
+            }
+          }
+        );
+      }
+    });
   };
 
   if (isLoading) {

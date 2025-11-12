@@ -75,7 +75,7 @@ export const CardProduct = ({img, name, price, slug, variants}: Props) => {
             {name}
           </h3>
           <p className="text-sm sm:text-base md:text-lg font-bold text-cyan-600">
-            {formatPrice(price)}
+            {formatPrice(price || (variants[0]?.price || 0))}
           </p>
         </div>
       </div>

@@ -33,7 +33,7 @@ export const authenticate = async (
 
     const { data: userData } = await supabase
       .from('users')
-      .select('id, email, full_name')
+      .select('id, full_name')
       .eq('user_id', user.id)
       .single();
 
@@ -43,6 +43,7 @@ export const authenticate = async (
       .eq('user_id', user.id)
       .single();
 
+    // Use email from Supabase Auth which is the actual login email
     req.user = {
       id: user.id,
       email: user.email || '',

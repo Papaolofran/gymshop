@@ -75,20 +75,41 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
   });
 };
 
-// PUT /api/orders/:id/status - Actualizar estado de orden (solo admin)
+// PUT /api/orders/:id/status - Actualizar estado de orden (admin)
+// PUT /api/orders/:id/cancel - Cancelar orden (usuario o admin)
 export const updateOrderStatus = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { status } = req.body;
+  // Si la ruta es /cancel, forzar el estado a 'cancelled'
+  const isCancelRoute = req.path.endsWith('/cancel');
+  const status = isCancelRoute ? 'cancelled' : req.body.status;
+
+  if (!req.user) {
+    throw new ApiError(401, 'Usuario no autenticado');
+  }
 
   if (!status) {
     throw new ApiError(400, 'El estado es requerido');
+  }
+  
+  // Si no es admin y no es la ruta de cancelación, error
+  const isAdmin = req.user.role === 'admin';
+  if (!isAdmin && !isCancelRoute) {
+    throw new ApiError(403, 'No tienes permisos para actualizar el estado de esta orden');
+  }
+  
+  // Si no es admin y es la ruta de cancelación, verificar que la orden pertenece al usuario
+  if (!isAdmin && isCancelRoute) {
+    // Verificar que la orden existe y pertenece al usuario
+    // La verificación de permisos se hace en getOrderById
+    // Si la orden no pertenece al usuario, getOrderById lanzará un error
+    await orderService.getOrderById(parseInt(id), req.user.id, false);
   }
 
   const result = await orderService.updateOrderStatus(parseInt(id), status);
 
   res.json({
     success: true,
-    message: result.message,
+    message: isCancelRoute ? 'Orden cancelada correctamente' : result.message,
     data: { status: result.status }
   });
 };

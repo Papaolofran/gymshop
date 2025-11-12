@@ -6,6 +6,8 @@ import { Newsletter } from "../components/home/Newsletter";
 import { Sheet } from "../components/shared/Sheet";
 import { useGlobalStore } from "../store/global.store";
 import { NavbarMobile } from "../components/shared/NavbarMobile";
+import { ConfirmModal } from "../components/shared/ConfirmModal";
+import { useModalStore } from "../store/modal.store";
 
 export const RootLayout = () => {
   const {pathname} = useLocation();
@@ -15,6 +17,9 @@ export const RootLayout = () => {
   return (
     <div className="h-screen flex flex-col font-montserrat">
       <Navbar/>
+      
+      {/* Spacer div to push content below the fixed navbar */}
+      <div className="h-[60px]"></div>
 
       {pathname === "/" && 
         <Banner/>
@@ -30,7 +35,14 @@ export const RootLayout = () => {
 
       {isSheetOpen && <Sheet/>}
 
-      {activeNavMobile && <NavbarMobile />} 
+      {activeNavMobile && <NavbarMobile />}
+      
+      <ConfirmModal
+        isOpen={useModalStore(state => state.isConfirmModalOpen)}
+        {...useModalStore(state => state.confirmModalProps)}
+        onConfirm={useModalStore(state => state.confirmModalProps.onConfirm) || (() => {})}
+        onCancel={useModalStore(state => state.confirmModalProps.onCancel) || (() => {})}
+      />
 
       <Footer/>
     </div>

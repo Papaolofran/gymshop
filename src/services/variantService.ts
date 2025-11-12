@@ -18,8 +18,8 @@ export interface Variant {
 
 // Interface para crear/actualizar variante
 export interface VariantFormData {
-  price: number;
-  stock: number;
+  price: number | string; // Permitir string vacío para facilitar la edición
+  stock: number | string; // Permitir string vacío para facilitar la edición
   color?: string;
   colorName?: string;
   size?: string;
@@ -73,9 +73,14 @@ export const updateVariant = async (
 // Eliminar variante (admin)
 export const deleteVariant = async (productId: string, variantId: string): Promise<void> => {
   const token = await getAuthToken();
-  await axios.delete(`${API_URL}/products/${productId}/variants/${variantId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  try {
+    await axios.delete(`${API_URL}/products/${productId}/variants/${variantId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  } catch (error) {
+    console.error(`Error deleting variant ${variantId} for product ${productId}:`, error);
+    throw error;
+  }
 };

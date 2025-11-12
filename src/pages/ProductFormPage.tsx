@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../hooks/auth/useUser';
 import { useUserProfile } from '../hooks/useUsers';
 import { useProductAdmin, useCreateProduct, useUpdateProduct } from '../hooks/useProductsAdmin';
 import { useCategories } from '../hooks/useCategories';
 import { LuLoaderCircle } from 'react-icons/lu';
+import toast from 'react-hot-toast';
 
 const BRANDS_BY_CATEGORY: Record<string, string[]> = {
   'Suplementos': ['Ena', 'Gentech', 'Star Nutrition'],
@@ -50,15 +51,25 @@ export const ProductFormPage = () => {
 
   // Obtener categoría seleccionada
   const selectedCategory = categories.find(cat => cat.id === formData.categoryId);
-  const availableBrands = selectedCategory ? getBrandsByCategory(selectedCategory.name) : [];
+  
+  // Determinar el tipo de producto según la categoría
+  const isClothing = selectedCategory?.name?.toLowerCase() === 'ropa';
+  const isSupplement = selectedCategory?.name?.toLowerCase() === 'suplementos';
+  
+  // Usar useMemo para evitar recalcular availableBrands en cada render
+  const availableBrands = useMemo(() => {
+    return selectedCategory ? getBrandsByCategory(selectedCategory.name) : [];
+  }, [selectedCategory]);
   
   // Debug: Ver qué categoría está seleccionada
   useEffect(() => {
     if (selectedCategory) {
       console.log('Categoría seleccionada:', selectedCategory.name);
+      console.log('Es producto de ropa:', isClothing);
+      console.log('Es suplemento:', isSupplement);
       console.log('Marcas disponibles:', availableBrands);
     }
-  }, [selectedCategory, availableBrands]);
+  }, [selectedCategory, availableBrands, isClothing, isSupplement]);
 
   // Resetear marca cuando cambia la categoría
   const handleCategoryChange = (categoryId: string) => {
@@ -72,18 +83,45 @@ export const ProductFormPage = () => {
   // Cargar datos del producto cuando está editando
   useEffect(() => {
     if (product && isEditing) {
+      console.log('Cargando datos del producto para editar:', product);
+      
       setFormData({
         name: product.name || '',
         slug: product.slug || '',
         description: product.description || '',
         brand: product.brand || '',
-        basePrice: product.variants?.[0]?.price || 0,
-        categoryId: product.categoryId || '',
+        // Ensure basePrice is a valid number
+        basePrice: typeof product.variants?.[0]?.price === 'number' ? product.variants[0].price : 0,
+        // Manejo de categoría más robusto
+        categoryId: product.categories?.id || product.category?.id || product.categoryId || '',
         images: product.images && product.images.length > 0 ? product.images : [''],
         isFeatured: product.isFeatured || false
       });
+      
+      // Mostrar info detallada sobre la categoría
+      console.log('Categoría detectada:', {
+        "categories.id": product.categories?.id,
+        "categories.name": product.categories?.name,
+        "category.id": product.category?.id,
+        "category.name": product.category?.name,
+        "categoryId": product.categoryId,
+      });
+      
+      // Verificar si tenemos categoryId pero no tenemos brand
+      if ((product.categories?.id || product.categoryId) && !product.brand) {
+        console.log('La categoría existe pero no la marca, intentando inferir marcas disponibles');
+        // Determinar las marcas disponibles basándonos en la categoría
+        const categoryName = product.categories?.name || 
+                           categories.find(c => c.id === product.categoryId)?.name || '';
+        
+        if (categoryName) {
+          console.log(`Categoría encontrada: ${categoryName}`);
+          const brands = getBrandsByCategory(categoryName);
+          console.log('Marcas disponibles:', brands);
+        }
+      }
     }
-  }, [product, isEditing]);
+  }, [product, isEditing, categories]);
 
   if (!session) {
     return <Navigate to="/login" />;
@@ -111,6 +149,18 @@ export const ProductFormPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate price is a number
+    if (isNaN(formData.basePrice)) {
+      toast.error('El precio base debe ser un número válido');
+      return;
+    }
+
+    // Ensure basePrice is a valid positive number
+    if (formData.basePrice < 0) {
+      toast.error('El precio base no puede ser negativo');
+      return;
+    }
 
     const filteredImages = formData.images.filter(img => img.trim() !== '');
 
@@ -234,16 +284,32 @@ export const ProductFormPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Precio base</label>
+            <label className="block text-sm font-medium mb-2">
+              Precio base
+              {isSupplement && (
+                <span className="text-xs text-gray-500 block">
+                  Para suplementos, el precio se define en cada variante según el peso
+                </span>
+              )}
+            </label>
             <input
               type="number"
-              required
+              required={!isSupplement}
               min="0"
               step="0.01"
               value={formData.basePrice}
-              onChange={(e) => setFormData({ ...formData, basePrice: parseFloat(e.target.value) })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2"
+              onChange={(e) => {
+                // Ensure we have a valid number, not NaN
+                const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                // Only update if it's a valid number
+                if (!isNaN(value)) {
+                  setFormData({ ...formData, basePrice: value });
+                }
+              }}
+              className={`w-full border border-gray-300 rounded-lg px-4 py-2 ${isSupplement ? 'opacity-50' : ''}`}
               placeholder="29990"
+              disabled={isSupplement}
+              title={isSupplement ? "El precio se define en las variantes según el peso" : ""}
             />
           </div>
         </div>

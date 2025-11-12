@@ -48,10 +48,22 @@ interface UserFromDB {
   full_name: string;
 }
 
+// Interfaz para los datos de dirección almacenados directamente en la orden
+interface AddressDataFromDB {
+  address_line1: string;
+  address_line2?: string | null;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  address_id?: string; // Referencia al ID original de la dirección
+}
+
 interface OrderFromDB {
   id: number;
   user_id: string;
-  direction_id: string;
+  direction_id?: string; // Ahora es opcional porque podría ser null
+  shipping_address_id?: string; // Nombre alternativo que se pueda usar
   delivery_date: string;
   shipping_cost: number;
   state: string;
@@ -59,6 +71,7 @@ interface OrderFromDB {
   updated_at: string;
   user?: UserFromDB;
   address?: AddressFromDB;
+  address_data?: AddressDataFromDB; // Datos de dirección almacenados cuando la dirección original fue eliminada
   items?: OrderItemFromDB[];
 }
 
@@ -212,6 +225,12 @@ export class OrderService {
       if (!order) {
         throw new ApiError(404, 'Orden no encontrada');
       }
+      
+      // Check if order is being cancelled
+      if (status === 'cancelled' && order.state !== 'cancelled') {
+        // Restore stock for all items in the order
+        await this.restoreStockForCancelledOrder(id);
+      }
 
       const updatedOrder = await this.orderRepository.updateStatus(id, status);
 
@@ -222,6 +241,46 @@ export class OrderService {
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, 'Error al actualizar estado de orden');
+    }
+  }
+  
+  // Restaurar stock cuando una orden es cancelada
+  private async restoreStockForCancelledOrder(orderId: number) {
+    try {
+      console.log(`Restaurando stock para la orden cancelada ${orderId}`);
+      
+      // Get all items in the order with their quantities
+      const order = await this.orderRepository.findById(orderId);
+      
+      if (!order || !order.items || order.items.length === 0) {
+        console.log(`No se encontraron items para la orden ${orderId}`);
+        return;
+      }
+      
+      console.log(`Encontrados ${order.items.length} items para restaurar stock`);
+      
+      // For each item, increase the variant's stock by the quantity ordered
+      for (const item of order.items) {
+        // Get current stock
+        const variant = await this.variantRepository.findById(item.variant_id);
+        
+        if (!variant) {
+          console.log(`Variante ${item.variant_id} no encontrada, no se puede restaurar stock`);
+          continue;
+        }
+        
+        // Calculate new stock
+        const newStock = variant.stock + item.quantity;
+        console.log(`Restaurando ${item.quantity} unidades para variante ${item.variant_id}. Stock actual: ${variant.stock}, Nuevo stock: ${newStock}`);
+        
+        // Update stock
+        await this.variantRepository.updateStock(item.variant_id, newStock);
+      }
+      
+      console.log(`Stock restaurado exitosamente para orden ${orderId}`);
+    } catch (error) {
+      console.error(`Error al restaurar stock para la orden ${orderId}:`, error);
+      throw new ApiError(500, 'Error al restaurar stock para orden cancelada');
     }
   }
 
@@ -290,6 +349,13 @@ export class OrderService {
         state: order.address.state,
         postalCode: order.address.postal_code,
         country: order.address.country
+      } : order.address_data ? {
+        // Usar datos almacenados si la dirección ya no existe
+        street: order.address_data.address_line1,
+        city: order.address_data.city,
+        state: order.address_data.state,
+        postalCode: order.address_data.postal_code,
+        country: order.address_data.country
       } : null,
       items: order.items?.map((item: OrderItemFromDB) => ({
         id: item.id,

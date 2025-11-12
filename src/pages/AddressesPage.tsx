@@ -4,6 +4,7 @@ import { useUser } from '../hooks/auth/useUser';
 import { useAddressesByUser, useCreateAddress, useUpdateAddress, useDeleteAddress } from '../hooks/useAddresses';
 import { LuLoaderCircle, LuPlus, LuPencil, LuTrash2 } from 'react-icons/lu';
 import type { Address, AddressFormData } from '../services/addressService';
+import { useModalStore } from '../store/modal.store';
 
 export const AddressesPage = () => {
   const { session } = useUser();
@@ -18,6 +19,7 @@ export const AddressesPage = () => {
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [formData, setFormData] = useState<AddressFormData>({
     street: '',
+    addressLine2: '',  // Added field for apartment/floor
     city: '',
     state: '',
     postalCode: '',
@@ -56,6 +58,7 @@ export const AddressesPage = () => {
     setEditingAddress(address);
     setFormData({
       street: address.street,
+      addressLine2: address.addressLine2 || '',
       city: address.city,
       state: address.state,
       postalCode: address.postalCode,
@@ -65,14 +68,20 @@ export const AddressesPage = () => {
   };
 
   const handleDelete = (addressId: string) => {
-    if (confirm('¿Estás seguro de eliminar esta dirección?')) {
-      deleteAddress(addressId);
-    }
+    useModalStore.getState().openConfirmModal({
+      title: "Eliminar dirección",
+      message: "¿Estás seguro de eliminar esta dirección?",
+      onConfirm: () => {
+        deleteAddress(addressId);
+        useModalStore.getState().closeConfirmModal();
+      }
+    });
   };
 
   const resetForm = () => {
     setFormData({
       street: '',
+      addressLine2: '',
       city: '',
       state: '',
       postalCode: '',
@@ -126,6 +135,19 @@ export const AddressesPage = () => {
                 onChange={(e) => setFormData({ ...formData, street: e.target.value })}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2"
                 placeholder="Av. Libertador 1234"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Piso / Apartamento <span className="text-gray-400 text-xs">(Opcional)</span>
+              </label>
+              <input
+                type="text"
+                value={formData.addressLine2}
+                onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2"
+                placeholder="3ro B"
               />
             </div>
 
@@ -229,6 +251,9 @@ export const AddressesPage = () => {
             >
               <div>
                 <p className="font-semibold text-lg mb-2">{address.street}</p>
+                {address.addressLine2 && (
+                  <p className="text-gray-600 mb-1">{address.addressLine2}</p>
+                )}
                 <p className="text-gray-600">
                   {address.city}, {address.state}
                 </p>

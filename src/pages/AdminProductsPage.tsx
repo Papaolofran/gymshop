@@ -6,6 +6,7 @@ import { useProducts } from '../hooks/products/useProducts';
 import { useDeleteProduct } from '../hooks/useProductsAdmin';
 import { LuLoaderCircle, LuPlus, LuPencil, LuTrash2, LuPackage } from 'react-icons/lu';
 import { formatPrice } from '../helpers';
+import { useModalStore } from '../store/modal.store';
 
 export const AdminProductsPage = () => {
   const { session } = useUser();
@@ -33,9 +34,14 @@ export const AdminProductsPage = () => {
   }
 
   const handleDeleteProduct = (productId: string, productName: string) => {
-    if (confirm(`¿Estás seguro de eliminar el producto "${productName}"?`)) {
-      deleteProduct(productId);
-    }
+    useModalStore.getState().openConfirmModal({
+      title: "Eliminar producto",
+      message: `¿Estás seguro de eliminar el producto "${productName}"?`,
+      onConfirm: () => {
+        deleteProduct(productId);
+        useModalStore.getState().closeConfirmModal();
+      }
+    });
   };
 
   const filteredProducts = products.filter(product =>

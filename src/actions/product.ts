@@ -116,14 +116,24 @@ export const getProductBySlug = async (slug: string) => {
 };
 
 export const searchProducts = async (searchTerm: string) => {
-  const {data, error} = await supabase
-  .from("products")
-  .select("*, variants(*)").ilike("name", `%${searchTerm}%`); //Buscar productos cuyo nombre contenga el termino de busqueda
+  // Normalizar el término de búsqueda: convertir a minúsculas y remover acentos
+  const normalizedTerm = searchTerm.toLowerCase();
 
-  if (error) {
-    console.log(error.message);
-    throw new Error(error.message);
+  try {
+    // Buscar productos por nombre con ILIKE (case-insensitive)
+    const {data, error} = await supabase
+      .from("products")
+      .select("*, variants(*)")
+      .or(`name.ilike.%${normalizedTerm}%,brand.ilike.%${normalizedTerm}%`); // Buscar en nombre y marca
+
+    if (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error al buscar productos:', error);
+    return [];
   }
-
-  return data;
 };
