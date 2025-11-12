@@ -9,6 +9,7 @@ GymShop es una aplicación web de e-commerce completa para la venta de productos
 ## Tecnologías Utilizadas
 
 ### Frontend
+
 - **React 18** con **TypeScript**
 - **Vite** como bundler
 - **React Router** para navegación
@@ -20,6 +21,7 @@ GymShop es una aplicación web de e-commerce completa para la venta de productos
 - **Axios** para peticiones HTTP
 
 ### Backend
+
 - **Node.js** con **TypeScript**
 - **Express** como framework de servidor
 - **Supabase** como base de datos (PostgreSQL)
@@ -60,6 +62,7 @@ cd ..
 ## Configuración de Variables de Entorno
 
 ### Frontend
+
 Crea un archivo `.env` en la raíz del proyecto con:
 
 ```env
@@ -69,6 +72,7 @@ VITE_SUPABASE_ANON_KEY=tu_clave_anónima_de_supabase
 ```
 
 ### Backend
+
 Crea un archivo `.env` en la carpeta `backend` con:
 
 ```env
@@ -86,6 +90,7 @@ SUPABASE_SERVICE_KEY=tu_clave_de_servicio_de_supabase
 ```bash
 pnpm run dev
 ```
+
 El frontend estará disponible en `http://localhost:5173`
 
 ### Ejecutar el Backend
@@ -94,6 +99,7 @@ El frontend estará disponible en `http://localhost:5173`
 cd backend
 pnpm run dev
 ```
+
 El servidor API estará disponible en `http://localhost:3000`
 
 ## Estructura del Proyecto
@@ -146,11 +152,13 @@ gymshop/
 ## Endpoints de la API
 
 ### Autenticación
+
 - `POST /api/auth/register` - Registro de usuario
 - `POST /api/auth/login` - Inicio de sesión
 - `GET /api/auth/verify` - Verificar token
 
 ### Usuarios
+
 - `GET /api/users` - Listar usuarios (admin)
 - `GET /api/users/:id` - Obtener usuario por ID
 - `PUT /api/users/:id` - Actualizar usuario
@@ -158,6 +166,7 @@ gymshop/
 - `PUT /api/users/:userId/role` - Cambiar rol (admin)
 
 ### Productos
+
 - `GET /api/products` - Listar productos con paginación
 - `GET /api/products/slug/:slug` - Obtener producto por slug
 - `GET /api/products/search?q=query` - Buscar productos
@@ -169,6 +178,7 @@ gymshop/
 - `DELETE /api/products/:id` - Eliminar producto (admin)
 
 ### Variantes
+
 - `GET /api/products/:productId/variants` - Listar variantes de producto
 - `GET /api/products/:productId/variants/:id` - Obtener variante
 - `POST /api/products/:productId/variants` - Crear variante (admin)
@@ -176,6 +186,7 @@ gymshop/
 - `DELETE /api/products/:productId/variants/:id` - Eliminar variante (admin)
 
 ### Direcciones
+
 - `GET /api/users/:userId/addresses` - Listar direcciones
 - `GET /api/users/:userId/addresses/:id` - Obtener dirección
 - `POST /api/users/:userId/addresses` - Crear dirección
@@ -183,6 +194,7 @@ gymshop/
 - `DELETE /api/users/:userId/addresses/:id` - Eliminar dirección
 
 ### Órdenes
+
 - `POST /api/orders` - Crear orden
 - `GET /api/users/:userId/orders` - Órdenes del usuario
 - `GET /api/orders/:id` - Detalle de orden
@@ -190,8 +202,5 @@ gymshop/
 
 ## Autores
 
-- [Tu Nombre](https://github.com/yourusername)
-
-## Licencia
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para detalles
+- Francisco Papaolo - 50249
+- Álvaro Renzi - 49621
