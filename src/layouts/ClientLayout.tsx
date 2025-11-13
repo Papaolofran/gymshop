@@ -30,10 +30,13 @@ export const ClientLayout = () => {
 
 	return (
 		<div className='flex flex-col min-h-screen'>
+			{/* Spacer div to push content below the fixed navbar */}
+			<div className='h-[60px]'></div>
+
 			{/* Menú de cuenta del usuario */}
-			<div className='bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200'>
+			<div className='w-full bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200'>
 				<nav className='container mx-auto px-4 py-4 sm:py-6'>
-					<div className='grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4'>
+					<div className='flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4'>
 						<NavLink
 							to='/account/perfil'
 							className={({ isActive }) =>
@@ -81,7 +84,7 @@ export const ClientLayout = () => {
 						)}
 						
 						<button 
-							className='px-4 sm:px-6 py-2.5 rounded-lg font-medium text-xs sm:text-sm bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-200 hover:shadow-md text-center col-span-2 sm:col-span-1'
+							className='px-4 sm:px-6 py-2.5 rounded-lg font-medium text-xs sm:text-sm bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-200 hover:shadow-md text-center'
 							onClick={handleLogout}
 						>
 							Cerrar Sesión
