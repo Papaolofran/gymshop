@@ -3,10 +3,9 @@ import { getAuthToken } from '../helpers/getAuthToken';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-// Create an axios instance with default config
 const apiClient = axios.create({
   baseURL: API_URL,
-  timeout: 10000, // 10 second timeout
+  timeout: 10000,
 });
 
 // Interface para crear/actualizar producto

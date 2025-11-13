@@ -1,10 +1,6 @@
 import { supabase } from '../supabase/client';
 
-/**
- * Obtiene el token de autenticación actual de Supabase
- * @returns El access token
- * @throws Error si no hay sesión activa
- */
+/** Obtener el token de autenticación actual de Supabase */
 export const getAuthToken = async (): Promise<string> => {
   const { data: { session } } = await supabase.auth.getSession();
   

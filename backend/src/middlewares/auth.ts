@@ -43,7 +43,6 @@ export const authenticate = async (
       .eq('user_id', user.id)
       .single();
 
-    // Use email from Supabase Auth which is the actual login email
     req.user = {
       id: user.id,
       email: user.email || '',

@@ -4,7 +4,7 @@
 
 @theme {
   --font-family-sans: 'Montserrat', sans-serif;
-  
+
   /* Configuración del Container */
   --container-padding: 1rem;
   --container-center: true;
@@ -20,18 +20,30 @@
   --animate-slide-in-left: slide-in-left 0.3s ease-in-out;
 
   @keyframes fade-in {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 
   @keyframes slide-in {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(0); }
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(0);
+    }
   }
 
   @keyframes slide-in-left {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(0); }
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(0);
+    }
   }
 }
 
