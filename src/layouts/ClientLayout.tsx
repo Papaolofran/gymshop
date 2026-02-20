@@ -30,8 +30,7 @@ export const ClientLayout = () => {
 
 	return (
 		<div className='flex flex-col min-h-screen'>
-			{/* Spacer div to push content below the fixed navbar */}
-			<div className='h-[60px]'></div>
+			<div className='h-[80px]'></div>
 
 			{/* Menú de cuenta del usuario */}
 			<div className='w-full bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200'>

@@ -354,7 +354,9 @@ export const ProductPage = () => {
     <>
     <div className="h-fit flex flex-col md:flex-row gap-16 mt-8">
       {/* GALERÍA DE IMAGENES*/}
-      <GridImages images={product?.images}/>
+      <div className="flex-1 max-w-xl">
+        <GridImages images={product?.images}/>
+      </div>
       
       <div className="flex-1 space-y-5">
         <h1 className="text-3xl font-bold tracking-tighter">

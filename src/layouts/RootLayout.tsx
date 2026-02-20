@@ -17,15 +17,13 @@ export const RootLayout = () => {
   return (
     <div className="h-screen flex flex-col font-montserrat">
       <Navbar/>
-      
-      {/* Spacer div to push content below the fixed navbar */}
-      <div className="h-[60px]"></div>
+      <div className="h-[80px]"></div>
 
       {pathname === "/" && 
         <Banner/>
       }
 
-    <main className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 my-8 flex-1">
+    <main className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 mt-14 flex-1">
       <Outlet/>
     </main>
 

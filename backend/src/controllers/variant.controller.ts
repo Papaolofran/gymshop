@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { VariantService } from '../services/variant.service.js';
+import { ApiError } from '../middlewares/errorHandler.js';
 
 // Controller: Capa que recibe peticiones HTTP de variantes
 // Maneja endpoints anidados bajo productos (/api/products/:productId/variants)
@@ -75,12 +76,26 @@ export const updateVariant = async (req: Request, res: Response) => {
 
 // DELETE /api/products/:productId/variants/:id - Eliminar variante (solo admin)
 export const deleteVariant = async (req: Request, res: Response) => {
-  const { productId, id } = req.params;
+  try {
+    const { productId, id } = req.params;
 
-  const result = await variantService.deleteVariant(id, productId);
+    const result = await variantService.deleteVariant(id, productId);
 
-  res.json({
-    success: true,
-    message: result.message
-  });
+    res.json({
+      success: true,
+      message: result.message
+    });
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.statusCode).json({
+        success: false,
+        message: error.message
+      });
+      return;
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
 };

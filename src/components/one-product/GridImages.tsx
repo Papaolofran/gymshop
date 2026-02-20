@@ -15,12 +15,12 @@ export const GridImages = ({images}: Props) => {
   
   return (
     <div className="flex-1 flex flex-col gap-3 relative">
-      <div className="bg-[#f2f2f2] w-full aspect-square p-8 flex items-center justify-center rounded-lg">
+      <div className="bg-white w-full max-h-[70vh] rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center" style={{ aspectRatio: '1/1' }}>
         {activeImage ? (
           <img
             src={activeImage}
             alt="Imagen de Producto"
-            className="max-h-full max-w-full object-contain"
+            className="w-full h-full object-contain"
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-gray-400">

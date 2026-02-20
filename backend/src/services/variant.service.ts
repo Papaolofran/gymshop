@@ -165,6 +165,9 @@ export class VariantService {
       return { message: 'Variante eliminada correctamente' };
     } catch (error) {
       if (error instanceof ApiError) throw error;
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23503') {
+        throw new ApiError(409, 'No se puede eliminar esta variante porque tiene pedidos asociados.');
+      }
       throw new ApiError(500, 'Error al eliminar variante');
     }
   }

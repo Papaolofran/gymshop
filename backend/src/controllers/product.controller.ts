@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { ProductService } from '../services/product.service.js';
+import { ApiError } from '../middlewares/errorHandler.js';
 
 // Controller: Capa que recibe peticiones HTTP de productos
 // Extrae parámetros y query strings, llama al service
@@ -127,12 +128,26 @@ export const updateProduct = async (req: Request, res: Response) => {
 
 // DELETE /api/products/:id - Eliminar producto (solo admin)
 export const deleteProduct = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-  const result = await productService.deleteProduct(id);
+    const result = await productService.deleteProduct(id);
 
-  res.json({
-    success: true,
-    message: result.message
-  });
+    res.json({
+      success: true,
+      message: result.message
+    });
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.statusCode).json({
+        success: false,
+        message: error.message
+      });
+      return;
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
 };

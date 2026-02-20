@@ -20,6 +20,28 @@ export interface ProductFormData {
   isFeatured?: boolean;
 }
 
+// Subir imagen de producto a Supabase Storage
+export const uploadProductImage = async (file: File): Promise<string> => {
+  try {
+    const token = await getAuthToken();
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await apiClient.post('/upload/product-image', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      },
+      timeout: 30000, // 30s por archivos grandes
+    });
+
+    return response.data.data.url;
+  } catch (error) {
+    console.error('Error uploading product image:', error);
+    throw error;
+  }
+};
+
 // Obtener producto por ID (admin)
 export const getProductById = async (productId: string) => {
   try {

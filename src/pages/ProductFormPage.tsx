@@ -6,6 +6,7 @@ import { useProductAdmin, useCreateProduct, useUpdateProduct } from '../hooks/us
 import { useCategories } from '../hooks/useCategories';
 import { LuLoaderCircle } from 'react-icons/lu';
 import toast from 'react-hot-toast';
+import { ImageUploader } from '../components/products/ImageUploader';
 
 const BRANDS_BY_CATEGORY: Record<string, string[]> = {
   'Suplementos': ['Ena', 'Gentech', 'Star Nutrition'],
@@ -181,18 +182,7 @@ export const ProductFormPage = () => {
     }
   };
 
-  const handleAddImage = () => {
-    setFormData({ ...formData, images: [...formData.images, ''] });
-  };
-
-  const handleRemoveImage = (index: number) => {
-    const newImages = formData.images.filter((_, i) => i !== index);
-    setFormData({ ...formData, images: newImages });
-  };
-
-  const handleImageChange = (index: number, value: string) => {
-    const newImages = [...formData.images];
-    newImages[index] = value;
+  const handleImagesChange = (newImages: string[]) => {
     setFormData({ ...formData, images: newImages });
   };
 
@@ -314,41 +304,10 @@ export const ProductFormPage = () => {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Imágenes (URLs)
-            <span className="block text-xs text-gray-500 font-normal mt-1">
-              Por ahora usa URLs de imágenes alojadas en servicios como Imgur, Cloudinary, etc.
-            </span>
-          </label>
-          {formData.images.map((image, index) => (
-            <div key={index} className="flex gap-2 mb-2">
-              <input
-                type="url"
-                value={image}
-                onChange={(e) => handleImageChange(index, e.target.value)}
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
-                placeholder="https://ejemplo.com/imagen.jpg"
-              />
-              {formData.images.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(index)}
-                  className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50"
-                >
-                  Eliminar
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={handleAddImage}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            + Agregar otra imagen
-          </button>
-        </div>
+        <ImageUploader
+          images={formData.images}
+          onChange={handleImagesChange}
+        />
 
         <div className="flex items-center gap-2">
           <input

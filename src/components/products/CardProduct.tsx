@@ -50,12 +50,12 @@ export const CardProduct = ({img, name, price, slug, variants}: Props) => {
             stock === 0 ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:shadow-lg hover:border-cyan-300'
           }`}
         >
-          <div className="flex w-full aspect-square items-center justify-center p-3 sm:p-4 overflow-hidden">
+          <div className="flex w-full items-center justify-center overflow-hidden bg-white" style={{ aspectRatio: '4/5' }}>
             {img ? (
               <img 
                 src={img} 
                 alt={name} 
-                className="object-contain w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-105"
+                className="object-contain w-full h-full p-2 transition-transform duration-300 ease-in-out group-hover:scale-105"
               />
             ) : (
               <div className="flex flex-col items-center justify-center text-gray-400">

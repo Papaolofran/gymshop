@@ -231,6 +231,9 @@ export class ProductService {
       return { message: 'Producto eliminado correctamente' };
     } catch (error) {
       if (error instanceof ApiError) throw error;
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23503') {
+        throw new ApiError(409, 'No se puede eliminar este producto porque tiene pedidos asociados. Desactivá las variantes en su lugar.');
+      }
       throw new ApiError(500, 'Error al eliminar producto');
     }
   }
