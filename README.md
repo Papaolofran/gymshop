@@ -1,6 +1,6 @@
 # GymShop - E-commerce de Productos Fitness
 
-![GymShop Logo](src/assets/logo.png)
+![GymShop Logo](frontend/src/assets/logo.png)
 
 ## Descripción del Proyecto
 
@@ -48,7 +48,9 @@ cd gymshop
 ### Instalar Dependencias del Frontend
 
 ```bash
+cd frontend
 pnpm install
+cd ..
 ```
 
 ### Instalar Dependencias del Backend
@@ -63,7 +65,7 @@ cd ..
 
 ### Frontend
 
-Crea un archivo `.env` en la raíz del proyecto con:
+Crea un archivo `.env` en la carpeta `frontend/` con:
 
 ```env
 VITE_API_URL=http://localhost:3000/api
@@ -88,6 +90,7 @@ SUPABASE_SERVICE_KEY=tu_clave_de_servicio_de_supabase
 ### Ejecutar el Frontend
 
 ```bash
+cd frontend
 pnpm run dev
 ```
 
@@ -106,27 +109,31 @@ El servidor API estará disponible en `http://localhost:3000`
 
 ```bash
 gymshop/
-├── src/                  # Código fuente del frontend
-│   ├── actions/          # Funciones para hacer peticiones a la API
-│   ├── assets/           # Recursos estáticos (imágenes, etc.)
-│   ├── components/       # Componentes React
-│   │   ├── home/         # Componentes específicos para la página principal
-│   │   ├── products/     # Componentes relacionados con productos
-│   │   ├── shared/       # Componentes compartidos (navbar, footer, etc.)
-│   │   └── skeletons/    # Componentes de carga
-│   ├── constants/        # Constantes y valores por defecto
-│   ├── helpers/          # Funciones auxiliares
-│   ├── hooks/            # Custom hooks de React
-│   │   ├── auth/         # Hooks de autenticación
-│   │   └── products/     # Hooks relacionados con productos
-│   ├── interfaces/       # Interfaces y tipos TypeScript
-│   ├── layouts/          # Layouts de la aplicación
-│   ├── pages/            # Páginas de la aplicación
-│   ├── services/         # Servicios para comunicación con la API
-│   ├── store/            # Store global (Zustand)
-│   ├── supabase/         # Configuración de Supabase
-│   ├── App.tsx           # Componente principal
-│   └── main.tsx          # Punto de entrada
+├── frontend/             # Código fuente del frontend
+│   ├── src/
+│   │   ├── actions/      # Funciones para hacer peticiones a la API
+│   │   ├── components/   # Componentes React
+│   │   │   ├── home/     # Componentes específicos para la página principal
+│   │   │   ├── products/ # Componentes relacionados con productos
+│   │   │   ├── shared/   # Componentes compartidos (navbar, footer, etc.)
+│   │   │   └── skeletons/ # Componentes de carga
+│   │   ├── constants/    # Constantes y valores por defecto
+│   │   ├── helpers/      # Funciones auxiliares
+│   │   ├── hooks/        # Custom hooks de React
+│   │   │   ├── auth/     # Hooks de autenticación
+│   │   │   └── products/ # Hooks relacionados con productos
+│   │   ├── interfaces/   # Interfaces y tipos TypeScript
+│   │   ├── layouts/      # Layouts de la aplicación
+│   │   ├── pages/        # Páginas de la aplicación
+│   │   ├── services/     # Servicios para comunicación con la API
+│   │   ├── store/        # Store global (Zustand)
+│   │   ├── supabase/     # Configuración de Supabase
+│   │   └── main.tsx      # Punto de entrada
+│   ├── public/           # Archivos públicos
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── tsconfig.json
 │
 ├── backend/              # Código fuente del backend
 │   ├── src/
@@ -140,13 +147,8 @@ gymshop/
 │   │   └── index.ts      # Punto de entrada
 │   └── package.json
 │
-├── public/               # Archivos públicos
 ├── .gitignore
-├── index.html
-├── package.json
-├── README.md
-├── tsconfig.json
-└── vite.config.ts
+└── README.md
 ```
 
 ## Endpoints de la API
