@@ -1,9 +1,14 @@
-import { ImSpinner9 } from "react-icons/im"
+import { LuLoaderCircle } from "react-icons/lu";
 
-export const Loader = () => {
+interface LoaderProps {
+  className?: string;
+  size?: number;
+}
+
+export const Loader = ({ className = "flex justify-center items-center h-[60vh]", size = 60 }: LoaderProps) => {
   return (
-    <div className="flex items-center justify-center min-h-[400px] w-full">
-      <ImSpinner9 className="animate-spin text-gray-700" size={70}/>
+    <div className={className}>
+      <LuLoaderCircle className="animate-spin text-gray-700" size={size}/>
     </div>
   );
 };

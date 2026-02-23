@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { RootLayout } from "../layouts/RootLayout";
-import { AboutPage, HomePage, OrdersUserPage, ProductsPage } from "../pages";
+import { AboutPage, HomePage, OrdersUserPage, ProductsPage, ResetPasswordPage } from "../pages";
 import { ProductPage } from "../pages/ProductPage";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
@@ -11,6 +11,7 @@ import { OrderDetailPage } from "../pages/OrderDetailPage";
 import { ProfilePage } from "../pages/ProfilePage";
 import { AdminUsersPage } from "../pages/AdminUsersPage";
 import { AdminProductsPage } from "../pages/AdminProductsPage";
+import { AdminOrdersPage } from "../pages/AdminOrdersPage";
 import { ProductFormPage } from "../pages/ProductFormPage";
 import { ProductVariantsPage } from "../pages/ProductVariantsPage";
 
@@ -44,6 +45,10 @@ export const router = createBrowserRouter([
                 element: <RegisterPage/>,
             },
             {
+                path: "reestablecer-password",
+                element: <ResetPasswordPage/>,
+            },
+            {
                 path: "checkout",
                 element: <CheckoutPage/>,
             },
@@ -58,6 +63,10 @@ export const router = createBrowserRouter([
             {
                 path: "admin/products",
                 element: <AdminProductsPage/>,
+            },
+            {
+                path: "admin/orders",
+                element: <AdminOrdersPage/>,
             },
             {
                 path: "admin/products/new",

@@ -6,7 +6,7 @@ import { LuLoaderCircle, LuUser, LuMail, LuPhone, LuTriangle } from 'react-icons
 import { signOut } from '../actions/auth';
 
 export const ProfilePage = () => {
-  const { session } = useUser();
+  const { session, isLoading: isLoadingSession } = useUser();
   const { data: userData, isLoading: loadingUser } = useUserProfile();
   const { mutate: updateUser, isPending } = useUpdateUser();
   const { mutate: deleteAccount, isPending: isDeleting } = useDeleteOwnAccount();
@@ -47,6 +47,14 @@ export const ProfilePage = () => {
     }
   }, [userData]);
 
+  if (isLoadingSession) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <LuLoaderCircle className="animate-spin text-blue-600" size={60} />
+      </div>
+    );
+  }
+
   if (!session) {
     return <Navigate to="/login" />;
   }
@@ -54,7 +62,7 @@ export const ProfilePage = () => {
   if (loadingUser) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
-        <LuLoaderCircle className="animate-spin" size={60} />
+        <LuLoaderCircle className="animate-spin text-blue-600" size={60} />
       </div>
     );
   }

@@ -338,6 +338,11 @@ export class OrderService {
     return {
       id: order.id,
       userId: order.user_id,
+      user: order.user ? {
+        id: order.user.id,
+        email: order.user.email,
+        fullName: order.user.full_name
+      } : null,
       addressId: order.direction_id,
       totalAmount: totalAmount,
       status: order.state,
@@ -378,6 +383,7 @@ export class OrderService {
       })) || [],
       createdAt: order.created_at,
       updatedAt: order.updated_at
+
     };
   }
 }

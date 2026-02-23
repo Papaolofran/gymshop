@@ -4,7 +4,7 @@ import { useOrderById, useCancelOrder } from '../hooks/useOrders';
 import { formatPrice } from '../helpers';
 import { LuLoaderCircle, LuPackage, LuX } from 'react-icons/lu';
 import { HiPhoto } from 'react-icons/hi2';
-import { useState } from 'react';
+import { useModalStore } from '../store/modal.store';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -24,21 +24,36 @@ const statusLabels: Record<string, string> = {
 
 export const OrderDetailPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const { session } = useUser();
+  const { session, isLoading: isLoadingUser } = useUser();
   const { data: order, isLoading, isError } = useOrderById(orderId || '');
   const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder();
-  const [showConfirmCancel, setShowConfirmCancel] = useState(false);
   
   // Function to handle order cancellation
-  const handleCancelOrder = () => {
+  const askCancelConfirm = () => {
     if (!orderId) return;
     
-    cancelOrder(orderId, {
-      onSuccess: () => {
-        setShowConfirmCancel(false);
+    useModalStore.getState().openConfirmModal({
+      title: '¿Cancelar esta orden?',
+      message: `¿Estás seguro que deseas cancelar la orden #${orderId}? Esta acción no se puede deshacer.`,
+      confirmText: 'Sí, cancelar orden',
+      cancelText: 'No, mantener orden',
+      onConfirm: () => {
+        cancelOrder(orderId, {
+          onSuccess: () => {
+            useModalStore.getState().closeConfirmModal();
+          }
+        });
       }
     });
   };
+
+  if (isLoadingUser) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <LuLoaderCircle className="animate-spin text-blue-600" size={60} />
+      </div>
+    );
+  }
 
   if (!session) {
     return <Navigate to="/login" />;
@@ -47,7 +62,7 @@ export const OrderDetailPage = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
-        <LuLoaderCircle className="animate-spin" size={60} />
+        <LuLoaderCircle className="animate-spin text-blue-600" size={60} />
       </div>
     );
   }
@@ -87,7 +102,7 @@ export const OrderDetailPage = () => {
             {/* Show cancel button only if order is in pending or processing state */}
             {['pending', 'processing'].includes(order.status) && (
               <button
-                onClick={() => setShowConfirmCancel(true)}
+                onClick={askCancelConfirm}
                 className="bg-red-50 text-red-600 px-4 py-2 rounded-full text-sm font-medium hover:bg-red-100 transition-colors flex items-center gap-1"
                 disabled={isCancelling}
               >
@@ -218,33 +233,6 @@ export const OrderDetailPage = () => {
           </div>
         </div>
       </div>
-      {/* Confirmation Dialog */}
-      {showConfirmCancel && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold mb-4">¿Cancelar esta orden?</h3>
-            <p className="mb-6 text-gray-600">
-              ¿Estás seguro que deseas cancelar la orden #{order.id}? Esta acción no se puede deshacer.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowConfirmCancel(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                disabled={isCancelling}
-              >
-                No, mantener orden
-              </button>
-              <button
-                onClick={handleCancelOrder}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-1"
-                disabled={isCancelling}
-              >
-                {isCancelling ? 'Cancelando...' : 'Sí, cancelar orden'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -131,7 +131,7 @@ export const ProductFormPage = () => {
   if (isLoadingUser) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
-        <LuLoaderCircle className="animate-spin" size={60} />
+        <LuLoaderCircle className="animate-spin text-blue-600" size={60} />
       </div>
     );
   }
@@ -143,7 +143,7 @@ export const ProductFormPage = () => {
   if (isEditing && isLoadingProduct) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
-        <LuLoaderCircle className="animate-spin" size={60} />
+        <LuLoaderCircle className="animate-spin text-blue-600" size={60} />
       </div>
     );
   }

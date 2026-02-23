@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createOrder, getOrderById, getOrdersByUser, cancelOrder } from '../services/orderService';
+import { createOrder, getOrderById, getOrdersByUser, cancelOrder, getAllOrders, updateOrderStatus } from '../services/orderService';
 import toast from 'react-hot-toast';
 import { useEffect } from 'react';
 
@@ -109,6 +109,55 @@ export const useCancelOrder = () => {
     },
     onError: (error: Error & { response?: { data?: { message?: string } } }) => {
       const message = error.response?.data?.message || 'Error al cancelar la orden';
+      toast.error(message);
+    }
+  });
+};
+
+// Hook para obtener todas las órdenes (solo admin)
+export const useAllOrders = () => {
+  const query = useQuery({
+    queryKey: ['orders', 'all'],
+    queryFn: getAllOrders,
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000),
+  });
+
+  useEffect(() => {
+    if (query.error) {
+      const error = query.error;
+      const errorMsg = error instanceof Error && (error.message.includes('backend') || error.message.includes('servidor'))
+        ? 'No se pudo conectar con el servidor. Verifica que el backend esté en ejecución.'
+        : error instanceof Error ? error.message : 'Error al cargar los pedidos';
+        
+      toast.error(errorMsg, {
+        id: 'all-orders-error',
+        duration: 5000,
+        style: {
+          borderRadius: '10px',
+          background: '#FEF2F2',
+          color: '#B91C1C',
+          padding: '12px'
+        }
+      });
+    }
+  }, [query.error]);
+
+  return query;
+};
+
+// Hook para actualizar estado de orden (admin)
+export const useUpdateOrderStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ orderId, status }: { orderId: string; status: string }) => updateOrderStatus(orderId, status),
+    onSuccess: () => {
+      toast.success('Estado actualizado correctamente');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
+      const message = error.response?.data?.message || 'Error al actualizar el estado de la orden';
       toast.error(message);
     }
   });

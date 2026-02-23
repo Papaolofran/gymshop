@@ -59,7 +59,7 @@ export const RegisterPage = () => {
 
 			{isPending ? (
 				<div className='w-full h-full flex justify-center mt-20'>
-					<LuLoaderCircle className='animate-spin' size={60} />
+					<LuLoaderCircle className='animate-spin text-blue-600' size={60} />
 				</div>
 			) : (
 				<>

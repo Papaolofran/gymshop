@@ -4,8 +4,9 @@ import { useOrdersByUser, useCancelOrder } from '../hooks/useOrders';
 import { formatPrice } from '../helpers';
 import { LuLoaderCircle, LuX, LuRefreshCw, LuWifiOff } from 'react-icons/lu';
 import { HiPhoto } from 'react-icons/hi2';
-import type { Order } from '../services/orderService';
 import { useState } from 'react';
+import type { Order } from '../services/orderService';
+import { useModalStore } from '../store/modal.store';
 
 const statusColors: Record<string, string> = {
 	pending: 'bg-yellow-100 text-yellow-800',
@@ -24,22 +25,35 @@ const statusLabels: Record<string, string> = {
 };
 
 export const OrdersUserPage = () => {
-	const { session } = useUser();
+	const { session, isLoading: isLoadingSession } = useUser();
 	const { data: orders = [], isLoading, isError, refetch } = useOrdersByUser(session?.user?.id || '');
 	const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder();
-	const [orderToCancel, setOrderToCancel] = useState<number | null>(null);
 	const [isRefetching, setIsRefetching] = useState(false);
 	
 	// Function to handle order cancellation
-	const handleCancelOrder = (orderId: number | null) => {
-		if (!orderId) return;
-		
-		cancelOrder(orderId.toString(), {
-			onSuccess: () => {
-				setOrderToCancel(null);
+	const askCancelConfirm = (orderId: number) => {
+		useModalStore.getState().openConfirmModal({
+			title: '¿Cancelar esta orden?',
+			message: `¿Estás seguro que deseas cancelar la orden #${orderId}? Esta acción no se puede deshacer.`,
+			confirmText: 'Sí, cancelar orden',
+			cancelText: 'No, mantener orden',
+			onConfirm: () => {
+				cancelOrder(orderId.toString(), {
+					onSuccess: () => {
+						useModalStore.getState().closeConfirmModal();
+					}
+				});
 			}
 		});
 	};
+
+	if (isLoadingSession) {
+		return (
+			<div className="flex justify-center items-center h-[60vh] flex-col gap-4">
+				<LuLoaderCircle className="animate-spin text-blue-600" size={60} />
+			</div>
+		);
+	}
 
 	if (!session) {
 		return <Navigate to="/login" />;
@@ -61,7 +75,7 @@ export const OrdersUserPage = () => {
 	if (isLoading) {
 		return (
 			<div className="flex justify-center items-center h-[60vh] flex-col gap-4">
-				<LuLoaderCircle className="animate-spin text-gray-500" size={60} />
+				<LuLoaderCircle className="animate-spin text-blue-600" size={60} />
 				<p className="text-gray-500">Cargando tus pedidos...</p>
 			</div>
 		);
@@ -148,10 +162,10 @@ export const OrdersUserPage = () => {
 									<button
 										onClick={(e) => {
 											e.preventDefault();
-											setOrderToCancel(order.id);
+											askCancelConfirm(order.id);
 										}}
 										className="absolute top-4 right-4 bg-red-50 text-red-600 px-3 py-1 rounded-full hover:bg-red-100 transition-colors flex items-center gap-1 text-xs"
-										disabled={isCancelling && orderToCancel === order.id}
+										disabled={isCancelling}
 										title="Cancelar orden"
 									>
 										<LuX size={14} />
@@ -224,34 +238,6 @@ export const OrdersUserPage = () => {
 					</div>
 				)}
 			</div>
-			
-			{/* Confirmation Dialog */}
-			{orderToCancel && (
-				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-					<div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-						<h3 className="text-xl font-bold mb-4">¿Cancelar esta orden?</h3>
-						<p className="mb-6 text-gray-600">
-							¿Estás seguro que deseas cancelar la orden #{orderToCancel}? Esta acción no se puede deshacer.
-						</p>
-						<div className="flex justify-end gap-3">
-							<button
-								onClick={() => setOrderToCancel(null)}
-								className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-								disabled={isCancelling}
-							>
-								No, mantener orden
-							</button>
-							<button
-								onClick={() => handleCancelOrder(orderToCancel)}
-								className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-1"
-								disabled={isCancelling}
-							>
-								{isCancelling ? 'Cancelando...' : 'Sí, cancelar orden'}
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
 		</>
 	);
 };

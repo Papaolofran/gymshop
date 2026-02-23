@@ -16,6 +16,11 @@ export interface CreateOrderData {
 export interface Order {
   id: number;
   userId: string;
+  user?: {
+    id: string;
+    email: string;
+    fullName: string;
+  } | null;
   addressId: string;
   totalAmount: number;
   status: string;
@@ -50,6 +55,29 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
 }
+
+// Obtener todas las órdenes (solo admin)
+export const getAllOrders = async (): Promise<Order[]> => {
+  try {
+    const token = await getAuthToken();
+    if (!token) throw new Error('No se encontró token de autenticación');
+    
+    const client = axios.create({
+      baseURL: API_URL,
+      timeout: 15000,
+    });
+    
+    const response = await client.get(`/orders`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data.data || [];
+  } catch (error) {
+    console.error('Error al obtener todas las órdenes:', error);
+    throw error;
+  }
+};
 
 // Obtener órdenes de un usuario
 export const getOrdersByUser = async (userId: string): Promise<Order[]> => {

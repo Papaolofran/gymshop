@@ -13,6 +13,7 @@ const apiClient = axios.create({
 // Interface para usuario
 export interface User {
   id: string;
+  userId: string;
   email: string;
   fullName: string;
   phone: string;

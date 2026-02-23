@@ -9,14 +9,23 @@ import { formatPrice } from '../helpers';
 import { useModalStore } from '../store/modal.store';
 
 export const AdminProductsPage = () => {
-  const { session } = useUser();
+  const { session, isLoading: isLoadingSession } = useUser();
   const { data: userData, isLoading: isLoadingUser } = useUserProfile();
   const { products = [], isLoading } = useProducts();
   const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
   
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Verificar si el usuario es admin
+  if (isLoadingSession) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <LuLoaderCircle className="animate-spin text-blue-600" size={60} />
+      </div>
+    );
+  }
+
   if (!session) {
     return <Navigate to="/login" />;
   }
@@ -24,7 +33,7 @@ export const AdminProductsPage = () => {
   if (isLoadingUser) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
-        <LuLoaderCircle className="animate-spin" size={60} />
+        <LuLoaderCircle className="animate-spin text-blue-600" size={60} />
       </div>
     );
   }
@@ -44,21 +53,42 @@ export const AdminProductsPage = () => {
     });
   };
 
+  const ITEMS_PER_PAGE = 8;
+
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.brand.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const currentProducts = filteredProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
-        <LuLoaderCircle className="animate-spin" size={60} />
+        <LuLoaderCircle className="animate-spin text-blue-600" size={60} />
       </div>
     );
   }
 
   return (
     <div className="max-w-7xl mx-auto py-8">
+      {/* Navegación Admin */}
+      <div className="flex gap-6 border-b border-gray-200 mb-8 pb-2">
+        <Link to="/admin/products" className="text-blue-600 font-bold border-b-2 border-blue-600 pb-2 transition-colors">
+          Gestión de Productos
+        </Link>
+        <Link to="/admin/users" className="text-gray-500 hover:text-blue-600 font-medium pb-2 transition-colors">
+          Gestión de Usuarios
+        </Link>
+        <Link to="/admin/orders" className="text-gray-500 hover:text-blue-600 font-medium pb-2 transition-colors">
+          Gestión de Órdenes
+        </Link>
+      </div>
+
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold">Gestión de Productos</h1>
@@ -79,14 +109,17 @@ export const AdminProductsPage = () => {
           type="text"
           placeholder="Buscar por nombre o marca..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
           className="w-full md:w-96 border border-gray-300 rounded-lg px-4 py-2"
         />
       </div>
 
       {/* Grid de productos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredProducts.map((product) => (
+        {currentProducts.map((product) => (
           <div
             key={product.id}
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
@@ -151,6 +184,29 @@ export const AdminProductsPage = () => {
           <p className="text-gray-600">
             {searchTerm ? 'No se encontraron productos' : 'No hay productos registrados'}
           </p>
+        </div>
+      )}
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-4 mt-8">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50"
+          >
+            Anterior
+          </button>
+          <span className="text-gray-600 font-medium">
+            Página {currentPage} de {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50"
+          >
+            Siguiente
+          </button>
         </div>
       )}
     </div>

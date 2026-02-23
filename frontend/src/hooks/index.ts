@@ -5,6 +5,8 @@
 export * from "./auth/useLogin";
 export * from "./auth/useRegister";
 export * from "./auth/useUser";
+export * from "./auth/useResetPasswordRequest";
+export * from "./auth/useUpdatePassword";
 
 /* ********************************** */
 /* ************ PRODUCTOS *********** */

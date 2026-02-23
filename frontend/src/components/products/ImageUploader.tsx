@@ -122,7 +122,7 @@ export const ImageUploader = ({ images, onChange }: ImageUploaderProps) => {
 
         {uploading ? (
           <div className="flex flex-col items-center gap-2">
-            <LuLoaderCircle className="animate-spin text-blue-500" size={40} />
+            <LuLoaderCircle className="animate-spin text-blue-600" size={40} />
             <p className="text-sm text-gray-500">Subiendo imagen...</p>
           </div>
         ) : (

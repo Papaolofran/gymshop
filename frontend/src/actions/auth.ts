@@ -116,6 +116,32 @@ export const getSession = async () => {
 	return data;
 };
 
+export const resetPasswordForEmail = async (email: string) => {
+	const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+		redirectTo: `${window.location.origin}/reestablecer-password`,
+	});
+
+	if (error) {
+		console.log(error);
+		throw new Error(error.message);
+	}
+
+	return data;
+};
+
+export const updatePassword = async (password: string) => {
+	const { data, error } = await supabase.auth.updateUser({
+		password,
+	});
+
+	if (error) {
+		console.log(error);
+		throw new Error(error.message);
+	}
+
+	return data;
+};
+
 // Export aliases for backward compatibility
 export const registerUser = signUp;
 export const loginUser = signIn;

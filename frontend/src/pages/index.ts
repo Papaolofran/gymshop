@@ -5,3 +5,5 @@ export * from './ProductPage';
 export * from './LoginPage';
 export * from './RegisterPage';
 export * from './OrdersUserPage';
+export * from './ResetPasswordPage';
+export * from './AdminOrdersPage';

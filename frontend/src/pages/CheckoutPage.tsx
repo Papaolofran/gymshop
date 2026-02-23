@@ -73,7 +73,7 @@ export const CheckoutPage = () => {
             
             {loadingAddresses ? (
               <div className="flex justify-center py-8">
-                <LuLoaderCircle className="animate-spin" size={30} />
+                <LuLoaderCircle className="animate-spin text-blue-600" size={30} />
               </div>
             ) : addresses.length === 0 ? (
               <div className="text-center py-8">

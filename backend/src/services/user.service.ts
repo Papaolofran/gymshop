@@ -131,8 +131,60 @@ export class UserService {
         throw new ApiError(404, 'Usuario no encontrado');
       }
 
-      await this.userRepository.delete(id);
+      const userId = user.user_id; // auth id
+      
+      console.log(`Iniciando eliminación COMPLETA de usuario por ADMIN con ID: ${user.id} (Auth ID: ${userId})`);
 
+      // PASO 1: Eliminar todas las direcciones del usuario
+      console.log('Eliminando direcciones del usuario...');
+      await this.userRepository.deleteUserAddresses(user.id);
+      
+      // PASO 2: Eliminar todos los pedidos del usuario y sus detalles
+      console.log('Eliminando pedidos del usuario...');
+      await this.userRepository.deleteUserOrders(user.id);
+      
+      // PASO 3: Eliminar todos los pagos asociados al usuario
+      console.log('Eliminando pagos del usuario...');
+      await this.userRepository.deleteUserPayments(user.id);
+      
+      // PASO 4: Eliminar el rol del usuario
+      console.log('Eliminando rol del usuario...');
+      await this.userRepository.deleteUserRole(userId);
+      
+      // PASO 5: Eliminar el registro del usuario de la tabla users
+      console.log('Eliminando datos de usuario...');
+      await this.userRepository.deleteUserRecord(user.id);
+      
+      // PASO 6: Eliminar las credenciales de autenticación en Supabase Auth
+      try {
+        const { supabaseAdmin } = await import('../config/database.js');
+        
+        console.log('Eliminando credenciales de autenticación...');
+        
+        const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+        
+        if (error) {
+          console.error('Error al eliminar usuario de Auth:', error);
+          try {
+            const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+              userId,
+              {
+                ban_duration: '8760h',
+                user_metadata: { deleted: true, deletedAt: new Date().toISOString() }
+              }
+            );
+            if (updateError) console.error('Error al deshabilitar usuario:', updateError);
+          } catch (banError) {
+            console.error('Error al intentar deshabilitar usuario:', banError);
+          }
+        } else {
+          console.log('Usuario eliminado correctamente de Supabase Auth');
+        }
+      } catch (authError) {
+        console.error('Error durante la eliminación de usuario en Auth:', authError);
+      }
+
+      console.log('Eliminación completa finalizada exitosamente');
       return { message: 'Usuario eliminado correctamente' };
     } catch (error) {
       if (error instanceof ApiError) throw error;
