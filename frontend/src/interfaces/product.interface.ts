@@ -32,6 +32,7 @@ export interface Product {
     category_id: string;
     categories?: Category;
     variants: VariantProduct[];
+    highlighted?: boolean | null;
 }
 
 export interface PreparedProducts {
@@ -47,4 +48,5 @@ export interface PreparedProducts {
       color: string;
     }[],
     variants: VariantProduct[];
+    highlighted?: boolean | null;
 }

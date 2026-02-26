@@ -84,7 +84,7 @@ export class AddressRepository {
     const { data, error } = await supabase
       .from('orders')
       .select('id')
-      .eq('shipping_address_id', addressId);
+      .eq('direction_id', addressId);
     
     if (error) throw error;
     return data || [];
@@ -107,7 +107,7 @@ export class AddressRepository {
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
         .select('id')
-        .eq('shipping_address_id', addressId);
+        .eq('direction_id', addressId);
       
       if (ordersError) throw ordersError;
       if (!orders || orders.length === 0) return; // No hay pedidos que actualizar
@@ -123,8 +123,8 @@ export class AddressRepository {
           postal_code: address.postal_code,
           address_id: address.id // Guardamos referencia al ID original por si acaso
         },
-        // Establecer shipping_address_id a null para eliminar la relación
-        shipping_address_id: null
+        // Establecer direction_id a null para eliminar la relación
+        direction_id: null
       };
       
       // 4. Actualizar cada pedido con los datos de la dirección

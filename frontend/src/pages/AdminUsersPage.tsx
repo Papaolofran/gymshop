@@ -9,6 +9,7 @@ import {
 } from '../hooks/useUsers';
 import { LuLoaderCircle, LuTrash2, LuShield, LuUser } from 'react-icons/lu';
 import { useModalStore } from '../store/modal.store';
+import { Pagination } from '../components/shared/Pagination';
 import toast from 'react-hot-toast';
 
 export const AdminUsersPage = () => {
@@ -100,7 +101,6 @@ export const AdminUsersPage = () => {
   };
 
   const filteredUsers = users.filter((user) => user.role === activeTab);
-  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
   const currentUsers = filteredUsers.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -294,27 +294,7 @@ export const AdminUsersPage = () => {
       </div>
 
       {/* Paginación */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4 mt-8">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50"
-          >
-            Anterior
-          </button>
-          <span className="text-gray-600 font-medium">
-            Página {currentPage} de {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50"
-          >
-            Siguiente
-          </button>
-        </div>
-      )}
+      <Pagination totalItems={filteredUsers.length} page={currentPage} setPage={setCurrentPage} itemsPerPage={ITEMS_PER_PAGE} />
     </div>
   );
 };

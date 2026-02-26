@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { RootLayout } from "../layouts/RootLayout";
-import { AboutPage, HomePage, OrdersUserPage, ProductsPage, ResetPasswordPage } from "../pages";
+import { AboutPage, HomePage, OrdersUserPage, ProductsPage, ResetPasswordPage, PrivacyPoliciesPage, TermsOfUsePage } from "../pages";
 import { ProductPage } from "../pages/ProductPage";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
@@ -35,6 +35,14 @@ export const router = createBrowserRouter([
             {
                 path: "nosotros",
                 element: <AboutPage/>,
+            },
+            {
+                path: "politicas-de-privacidad",
+                element: <PrivacyPoliciesPage/>,
+            },
+            {
+                path: "terminos-de-uso",
+                element: <TermsOfUsePage/>,
             },
             {
                 path: "login",

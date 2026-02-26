@@ -6,4 +6,6 @@ export * from './LoginPage';
 export * from './RegisterPage';
 export * from './OrdersUserPage';
 export * from './ResetPasswordPage';
+export * from './PrivacyPoliciesPage';
+export * from './TermsOfUsePage';
 export * from './AdminOrdersPage';

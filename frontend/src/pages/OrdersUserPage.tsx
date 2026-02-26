@@ -4,9 +4,10 @@ import { useOrdersByUser, useCancelOrder } from '../hooks/useOrders';
 import { formatPrice } from '../helpers';
 import { LuLoaderCircle, LuX, LuRefreshCw, LuWifiOff } from 'react-icons/lu';
 import { HiPhoto } from 'react-icons/hi2';
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Order } from '../services/orderService';
 import { useModalStore } from '../store/modal.store';
+import { Pagination } from '../components/shared/Pagination';
 
 const statusColors: Record<string, string> = {
 	pending: 'bg-yellow-100 text-yellow-800',
@@ -30,6 +31,10 @@ export const OrdersUserPage = () => {
 	const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder();
 	const [isRefetching, setIsRefetching] = useState(false);
 	
+	const [statusFilter, setStatusFilter] = useState<string>('all');
+	const [currentPage, setCurrentPage] = useState<number>(1);
+	const itemsPerPage = 6;
+	
 	// Function to handle order cancellation
 	const askCancelConfirm = (orderId: number) => {
 		useModalStore.getState().openConfirmModal({
@@ -46,6 +51,24 @@ export const OrdersUserPage = () => {
 			}
 		});
 	};
+
+	const filteredOrders = useMemo(() => {
+		if (statusFilter === 'all') return orders;
+		return orders.filter((order: Order) => order.status === statusFilter);
+	}, [orders, statusFilter]);
+
+	const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+
+	useEffect(() => {
+		if (currentPage > totalPages && totalPages > 0) {
+			setCurrentPage(totalPages);
+		}
+	}, [filteredOrders, totalPages, currentPage]);
+
+	const paginatedOrders = useMemo(() => {
+		const startIndex = (currentPage - 1) * itemsPerPage;
+		return filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+	}, [filteredOrders, currentPage]);
 
 	if (isLoadingSession) {
 		return (
@@ -64,6 +87,7 @@ export const OrdersUserPage = () => {
 		setIsRefetching(true);
 		try {
 			await refetch();
+			setCurrentPage(1);
 		} catch (error) {
 			console.error('Error al recargar pedidos:', error);
 		} finally {
@@ -111,7 +135,7 @@ export const OrdersUserPage = () => {
 
 	return (
 		<>
-			<div className='flex flex-col gap-6 py-8'>
+			<div className='flex flex-col gap-6 py-8 md:pr-4'>
 				<div className='flex justify-between items-center'>
 					<div className='flex gap-2 items-center'>
 						<h1 className='text-3xl font-bold'>Mis Pedidos</h1>
@@ -139,8 +163,8 @@ export const OrdersUserPage = () => {
 				</div>
 
 				{orders.length === 0 ? (
-					<div className="flex flex-col items-center gap-6 mt-12">
-						<p className='text-slate-600'>
+					<div className="flex flex-col items-center gap-6 mt-12 w-full">
+						<p className='text-slate-600 text-center'>
 							Todavía no has hecho ningún pedido
 						</p>
 						<Link
@@ -151,90 +175,124 @@ export const OrdersUserPage = () => {
 						</Link>
 					</div>
 				) : (
-					<div className="space-y-4">
-						{orders.map((order: Order) => (
-							<div
-								key={order.id}
-								className="relative bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+					<div className="w-full">
+						{/* Filters */}
+						<div className="flex w-full mb-6 overflow-x-auto pb-4 custom-scrollbar gap-2">
+							<button
+								onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
+								className={`px-5 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${statusFilter === 'all' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
 							>
-								{/* Cancel button for pending or processing orders */}
-								{['pending', 'processing'].includes(order.status) && (
-									<button
-										onClick={(e) => {
-											e.preventDefault();
-											askCancelConfirm(order.id);
-										}}
-										className="absolute top-4 right-4 bg-red-50 text-red-600 px-3 py-1 rounded-full hover:bg-red-100 transition-colors flex items-center gap-1 text-xs"
-										disabled={isCancelling}
-										title="Cancelar orden"
-									>
-										<LuX size={14} />
-										Cancelar
-									</button>
-								)}
-								
-								<Link
-									to={`/orders/${order.id.toString()}`}
-									className="block"
+								Todos
+							</button>
+							{Object.entries(statusLabels).map(([status, label]) => (
+								<button
+									key={status}
+									onClick={() => { setStatusFilter(status); setCurrentPage(1); }}
+									className={`px-5 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${statusFilter === status ? statusColors[status] : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
 								>
-									<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-										{/* Info principal */}
-										<div className="flex-1">
-											<div className="flex items-center gap-3 mb-2">
-												<h3 className="font-semibold">
-													Orden #{order.id}
-												</h3>
-												<span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[order.status]}`}>
-													{statusLabels[order.status]}
-												</span>
-											</div>
-											
-											<p className="text-sm text-gray-600">
-												{new Date(order.createdAt).toLocaleDateString('es-ES', {
-													year: 'numeric',
-													month: 'long',
-													day: 'numeric'
-												})}
-											</p>
-											
-											<p className="text-sm text-gray-600 mt-1">
-												{order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
-											</p>
-										</div>
+									{label}
+								</button>
+							))}
+						</div>
 
-										{/* Total */}
-										<div className="text-right pt-8 md:pt-0">
-											<p className="text-sm text-gray-600">Total</p>
-											<p className="text-xl font-bold">
-												{formatPrice(order.totalAmount)}
-											</p>
-										</div>
-									</div>
-
-									{/* Productos (preview) */}
-									<div className="flex gap-2 mt-4 flex-wrap">
-										{order.items.slice(0, 3).map((item: Order['items'][0]) => (
-											<div key={item.id} className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
-												{item.variant.product.images && item.variant.product.images.length > 0 ? (
-													<img
-														src={item.variant.product.images[0]}
-														alt={item.variant.product.name}
-														className="w-full h-full object-cover"
-													/>
-												) : (
-													<HiPhoto className="text-gray-400" size={30} />
-												)}
-											</div>
-										))}
-										{order.items.length > 3 && (
-											<div className="w-16 h-16 bg-gray-100 rounded-md flex items-center justify-center text-sm text-gray-600">
-												+{order.items.length - 3}
-											</div>
-										)}
-									</div>
-								</Link>
+						{filteredOrders.length === 0 ? (
+							<div className="text-center py-12 text-gray-500 bg-gray-50 rounded-xl">
+								No hay pedidos con este estado.
 							</div>
-						))}
+						) : (
+							<>
+								<div className="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
+									{paginatedOrders.map((order: Order) => (
+										<div
+											key={order.id}
+											className="relative bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow h-full flex flex-col justify-between"
+										>
+											<div className="flex-1">
+												{/* Cancel button for pending or processing orders */}
+												{['pending', 'processing'].includes(order.status) && (
+													<button
+														onClick={(e) => {
+															e.preventDefault();
+															askCancelConfirm(order.id);
+														}}
+														className="absolute top-4 right-4 bg-red-50 text-red-600 px-3 py-1 rounded-full hover:bg-red-100 transition-colors flex items-center gap-1 text-xs z-10"
+														disabled={isCancelling}
+														title="Cancelar orden"
+													>
+														<LuX size={14} />
+														Cancelar
+													</button>
+												)}
+												
+												<Link
+													to={`/orders/${order.id.toString()}`}
+													className="block"
+												>
+													<div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+														{/* Info principal */}
+														<div className="flex-1 pr-24">
+															<div className="flex flex-wrap items-center gap-3 mb-2">
+																<h3 className="font-bold text-lg">
+																	Orden #{order.id}
+																</h3>
+																<span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${statusColors[order.status]}`}>
+																	{statusLabels[order.status]}
+																</span>
+															</div>
+															
+															<p className="text-sm text-gray-600">
+																{new Date(order.createdAt).toLocaleDateString('es-ES', {
+																	year: 'numeric',
+																	month: 'long',
+																	day: 'numeric'
+																})}
+															</p>
+															
+															<p className="text-sm font-medium text-gray-800 mt-2">
+																{order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
+															</p>
+														</div>
+
+														{/* Total */}
+														<div className="text-left md:text-right pt-4 md:pt-0">
+															<p className="text-sm text-gray-500 uppercase tracking-widest font-semibold">Total</p>
+															<p className="text-2xl font-black text-black">
+																{formatPrice(order.totalAmount)}
+															</p>
+														</div>
+													</div>
+
+													{/* Productos (preview) */}
+													<div className="flex gap-2 mt-6 flex-wrap">
+														{order.items.slice(0, 4).map((item: Order['items'][0]) => (
+															<div key={item.id} className="w-16 h-16 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center">
+																{item.variant.product.images && item.variant.product.images.length > 0 ? (
+																	<img
+																		src={item.variant.product.images[0]}
+																		alt={item.variant.product.name}
+																		className="w-full h-full object-cover"
+																	/>
+																) : (
+																	<HiPhoto className="text-gray-300" size={24} />
+																)}
+															</div>
+														))}
+														{order.items.length > 4 && (
+															<div className="w-16 h-16 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center text-sm font-semibold text-gray-600">
+																+{order.items.length - 4}
+															</div>
+														)}
+													</div>
+												</Link>
+											</div>
+										</div>
+									))}
+								</div>
+								
+								{/* Paginación */}
+								<Pagination totalItems={filteredOrders.length} page={currentPage} setPage={setCurrentPage} itemsPerPage={itemsPerPage} />
+							</>
+						)}
 					</div>
 				)}
 			</div>

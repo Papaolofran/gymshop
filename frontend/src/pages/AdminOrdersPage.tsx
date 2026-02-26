@@ -7,6 +7,7 @@ import { LuLoaderCircle, LuSearch, LuPackage } from 'react-icons/lu';
 import { formatPrice } from '../helpers';
 import type { Order } from '../services/orderService';
 import { useModalStore } from '../store/modal.store';
+import { Pagination } from '../components/shared/Pagination';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -92,7 +93,6 @@ export const AdminOrdersPage = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
   const currentOrders = filteredOrders.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -232,27 +232,7 @@ export const AdminOrdersPage = () => {
       </div>
 
       {/* Paginación */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4 mt-8">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50"
-          >
-            Anterior
-          </button>
-          <span className="text-gray-600 font-medium">
-            Página {currentPage} de {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50"
-          >
-            Siguiente
-          </button>
-        </div>
-      )}
+      <Pagination totalItems={filteredOrders.length} page={currentPage} setPage={setCurrentPage} itemsPerPage={ITEMS_PER_PAGE} />
     </div>
   );
 };

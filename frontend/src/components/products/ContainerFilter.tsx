@@ -21,9 +21,11 @@ interface Props {
     setSelectedBrands: (brands: string[]) => void;
     selectedCategories: string[];
     setSelectedCategories: (categories: string[]) => void;
+    isFeatured: boolean;
+    setIsFeatured: (featured: boolean) => void;
 }
 
-export const ContainerFilter = ({ selectedBrands, setSelectedBrands, selectedCategories, setSelectedCategories }: Props) => {
+export const ContainerFilter = ({ selectedBrands, setSelectedBrands, selectedCategories, setSelectedCategories, isFeatured, setIsFeatured }: Props) => {
     
     const handleBrandChange = (brand: string) => {
         if(selectedBrands.includes(brand)) {
@@ -46,6 +48,23 @@ export const ContainerFilter = ({ selectedBrands, setSelectedBrands, selectedCat
           <h3 className="font-semibold text-lg sm:text-xl mb-4">
             Filtros
           </h3>
+
+          <Separator/>
+
+          {/* FILTRO DE DESTACADOS */}
+          <div className="flex flex-col gap-3 my-6">
+            <label className="inline-flex items-center cursor-pointer group">
+              <input 
+                type="checkbox"
+                className="w-4 h-4 text-cyan-600 border-gray-300 rounded focus:ring-2 focus:ring-cyan-500 cursor-pointer"
+                checked={isFeatured}
+                onChange={() => setIsFeatured(!isFeatured)}
+              />
+              <span className="ml-2 text-base font-medium text-slate-800 group-hover:text-cyan-600 transition-colors">
+                Destacados
+              </span>
+            </label>
+          </div>
 
           <Separator/>
 

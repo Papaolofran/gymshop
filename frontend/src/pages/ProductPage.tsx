@@ -2,8 +2,7 @@ import { LuMinus, LuPlus } from "react-icons/lu"
 import { Separator } from "../components/shared/Separator"
 import { formatPrice } from "../helpers"
 import { CiDeliveryTruck } from "react-icons/ci"
-import { Link, useParams } from "react-router-dom"
-import { BsChatLeftText } from "react-icons/bs"
+import { useParams, useNavigate } from "react-router-dom"
 import { GridImages } from "../components/one-product/GridImages"
 import { useProduct } from "../hooks/products/useProduct";
 import { useMemo, useEffect, useState } from "react";
@@ -31,6 +30,7 @@ interface SupplementAcc {
 export const ProductPage = () => {
 
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   
   // Usar una clave única para forzar recarga de datos
   const refreshKey = useMemo(() => Date.now().toString(), []);
@@ -64,6 +64,7 @@ export const ProductPage = () => {
   
   const addItem = useCartStore(state => state.addItem);
   const openSheet = useGlobalStore(state => state.openSheet);
+  const closeSheet = useGlobalStore(state => state.closeSheet);
 
   // Detectar tipo de producto
   const isClothing = product?.categories?.name?.toLowerCase() === 'ropa';
@@ -331,13 +332,19 @@ export const ProductPage = () => {
     
     addItem(cartItem);
     resetCount();
-    openSheet('cart');
   };
   
+  // Función principal para el botón de agregar
+  const handleAddToCartClick = () => {
+    handleAddToCart();
+    openSheet('cart');
+  };
+
   // Función para comprar ahora
   const handleBuyNow = () => {
     handleAddToCart();
-    // Aquí podrías redirigir directamente al checkout si lo deseas
+    closeSheet(); // Nos aseguramos que el panel no esté abierto tapando la vista
+    navigate('/checkout');
   };
 
   if(isLoading) return <Loader/>
@@ -545,7 +552,7 @@ export const ProductPage = () => {
               {/* BOTONES ACCIÓN */}
               <div className="flex flex-col gap-3">
                 <button 
-                  onClick={handleAddToCart}
+                  onClick={handleAddToCartClick}
                   disabled={!selectedVariant}
                   className="bg-[#f3f3f3] uppercase font-semibold tracking-widest text-xs py-4 rounded-full transition-all duration-300 hover:bg-[#e2e2e2] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -563,23 +570,15 @@ export const ProductPage = () => {
           )
         }
 
-        <div className="flex pt-2">
-          <div className="flex flex-col gap-1-flex-1 item">
-            <CiDeliveryTruck size={35}/>
-            <p className="text-xs font-semibold">
-              Envío gratis
+        <div className="flex pt-4 pb-2 border-t border-slate-100 mt-2">
+          <div className="flex items-center gap-3 text-slate-600">
+            <div className="bg-slate-100 p-2 rounded-full">
+              <CiDeliveryTruck size={24} className="text-slate-800"/>
+            </div>
+            <p className="text-sm font-semibold">
+              Envío gratis a todo el país
             </p>  
           </div>
-
-          <Link to="#" className="flex flex-col gap-1 flex-1 items-center justify-center">
-            <BsChatLeftText size={30}/>
-            <p className="flex flex-col items-center text-xs">
-              <span className="font-semibold">
-                ¿Necesitas ayuda?
-              </span>
-              Contáctanos aquí
-            </p>  
-          </Link>
         </div>
       </div>
     </div>

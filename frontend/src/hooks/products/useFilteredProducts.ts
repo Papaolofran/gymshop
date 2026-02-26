@@ -5,14 +5,16 @@ export const useFilteredProducts = ({
   page,
   brands,
   categories,
+  isFeatured,
 }: {
   page: number;
   brands: string[];
   categories: string[];
+  isFeatured?: boolean;
 }) => {
   const { data, isLoading } = useQuery({
-    queryKey: ["filteredProducts", page, brands, categories],
-    queryFn: () => getFilteredProducts({ page, brands, categories }),
+    queryKey: ["filteredProducts", page, brands, categories, isFeatured],
+    queryFn: () => getFilteredProducts({ page, brands, categories, isFeatured }),
     retry: false,    
     
   });

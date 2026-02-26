@@ -74,10 +74,10 @@ export const Footer = () => {
 
           <nav className="flex flex-col gap-2 text-xs font-medium">
             <Link to="/productos">Productos</Link>
-            <Link to="#" className="text-slate-300 hover:text-white">
+            <Link to="/politicas-de-privacidad" className="text-slate-300 hover:text-white">
               Políticas de privacidad
             </Link>
-            <Link to="#" className="text-slate-300 hover:text-white">
+            <Link to="/terminos-de-uso" className="text-slate-300 hover:text-white">
               Términos de uso
             </Link>
           </nav>

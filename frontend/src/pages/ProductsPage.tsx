@@ -11,11 +11,13 @@ export const ProductsPage = () => {
     const [page, setPage] = useState(1);
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [isFeatured, setIsFeatured] = useState<boolean>(false);
     
     const { data: products = [], isLoading, totalProducts } = useFilteredProducts({
         page,
         brands: selectedBrands,
         categories: selectedCategories,
+        isFeatured,
     });
 
     const preparedProducts = isLoading ? [] : prepareProducts(products);
@@ -34,6 +36,8 @@ export const ProductsPage = () => {
                     setSelectedBrands={setSelectedBrands}
                     selectedCategories={selectedCategories}
                     setSelectedCategories={setSelectedCategories}
+                    isFeatured={isFeatured}
+                    setIsFeatured={setIsFeatured}
                 />
             </aside>
 
@@ -55,6 +59,7 @@ export const ProductsPage = () => {
                                     slug={product.slug}
                                     colors={product.colors}
                                     variants={product.variants}
+                                    highlighted={product.highlighted}
                                 />
                             ))}
                         </div>
@@ -63,6 +68,7 @@ export const ProductsPage = () => {
                             totalItems={totalProducts}
                             page={page}
                             setPage={setPage}
+                            itemsPerPage={12}
                         />
                     </div>
                 )}

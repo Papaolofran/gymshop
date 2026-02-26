@@ -1,4 +1,5 @@
 import { supabase } from '../supabase/client';
+import { useCartStore } from '../store/cart.store';
 
 interface IAuthLogin {
 	email: string;
@@ -103,6 +104,9 @@ export const signOut = async () => {
 		console.log(error);
 		throw new Error('Error al cerrar sesión');
 	}
+	
+	// Limpiar el carrito de silenciosamente al cerrar sesión
+	useCartStore.setState({ items: [] });
 };
 
 export const getSession = async () => {

@@ -7,6 +7,7 @@ import { useDeleteProduct } from '../hooks/useProductsAdmin';
 import { LuLoaderCircle, LuPlus, LuPencil, LuTrash2, LuPackage } from 'react-icons/lu';
 import { formatPrice } from '../helpers';
 import { useModalStore } from '../store/modal.store';
+import { Pagination } from '../components/shared/Pagination';
 
 export const AdminProductsPage = () => {
   const { session, isLoading: isLoadingSession } = useUser();
@@ -60,7 +61,6 @@ export const AdminProductsPage = () => {
     product.brand.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const currentProducts = filteredProducts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -129,7 +129,7 @@ export const AdminProductsPage = () => {
                 <img
                   src={product.images[0]}
                   alt={product.name}
-                  className="w-full h-full object-contain p-2"
+                  className="w-full h-full object-contain"
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center text-gray-400">
@@ -138,8 +138,8 @@ export const AdminProductsPage = () => {
                 </div>
               )}
               {product.highlighted && (
-                <span className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded">
-                  Destacado
+                <span className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-bl-lg rounded-tr-xl shadow-sm z-10 w-fit">
+                  DESTACADO
                 </span>
               )}
             </div>
@@ -188,27 +188,7 @@ export const AdminProductsPage = () => {
       )}
 
       {/* Paginación */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4 mt-8">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50"
-          >
-            Anterior
-          </button>
-          <span className="text-gray-600 font-medium">
-            Página {currentPage} de {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50"
-          >
-            Siguiente
-          </button>
-        </div>
-      )}
+      <Pagination totalItems={filteredProducts.length} page={currentPage} setPage={setCurrentPage} itemsPerPage={ITEMS_PER_PAGE} />
     </div>
   );
 };

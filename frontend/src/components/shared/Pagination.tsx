@@ -1,57 +1,37 @@
+import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
+
 interface Props{
   totalItems: number;
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
+  itemsPerPage?: number;
 }
 
+export const Pagination = ({totalItems, page, setPage, itemsPerPage = 10}: Props) => {
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
 
+  // Ocultar si sólo hay 1 página
+  if (totalPages <= 1) return null;
 
-export const Pagination = ({totalItems, page, setPage}: Props) => {
-
-  const handleNextPage = () => {
-    setPage(page + 1);
-  };
-
-  const handlePrevPage = () => {
-    setPage(prevPage => Math.max(prevPage - 1, 1));
-  };
-
-
-  const itemsPerPage = 10;
-  const totalPages = totalItems
-    ? Math.ceil(totalItems / itemsPerPage)
-    : 1;
-
-  const isLastPage = page >= totalPages;
-
-  const startItem = (page - 1) * itemsPerPage + 1; // 1 -> 11 -> 21
-  const endItem = Math.min(page * itemsPerPage, totalItems); // 10 -> 20 -> 30
-  
-  return <div className="flex justify-between items-center">
-    <p className="text-xs font-medium">
-      Mostrando <span className="font-bold">
-        {startItem} - {endItem}
-      </span> de <span className="font-bold">
-        {totalItems}
-      </span> productos
-    </p>
-    <div className="flex gap-3">
+  return (
+    <div className="flex justify-center items-center gap-4 mt-8 bg-white py-3 px-6 rounded-full shadow-sm w-fit mx-auto border border-gray-100">
       <button
-        className="btn-paginated"
-        onClick={handlePrevPage}
+        onClick={() => setPage(p => Math.max(p - 1, 1))}
         disabled={page === 1}
+        className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
       >
-        Anterior
+        <LuChevronLeft size={20} />
       </button>
-
+      <span className="text-sm font-medium text-gray-600">
+        Página <span className="text-black font-bold">{page}</span> de {totalPages}
+      </span>
       <button
-        className="btn-paginated"
-        onClick={handleNextPage}
-        disabled={isLastPage}
+        onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+        disabled={page === totalPages}
+        className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
       >
-        Siguiente
+        <LuChevronRight size={20} />
       </button>
     </div>
-  </div>;
-
+  );
 };

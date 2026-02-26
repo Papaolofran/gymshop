@@ -18,20 +18,27 @@ export const getFilteredProducts = async ({
   page = 1,
   brands = [],
   categories = [],
+  isFeatured = false,
 }: {
   page: number;
   brands: string[];
   categories: string[];
+  isFeatured?: boolean;
 }) => {
-  const itemsPerPage = 10;
+  const itemsPerPage = 12;
   const from = (page - 1) * itemsPerPage;
   const to = from + itemsPerPage - 1;
 
   let query = supabase
     .from("products")
-    .select("*, variants(*), categories(name)", { count: "exact" })
+    .select("*, variants(*), categories(*)", { count: "exact" })
+    .order("highlighted", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
     .range(from, to);
+
+  if (isFeatured) {
+    query = query.eq("highlighted", true);
+  }
 
   if (brands.length > 0) {
     query = query.in("brand", brands);

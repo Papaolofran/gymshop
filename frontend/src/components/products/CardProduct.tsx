@@ -12,9 +12,10 @@ interface Props {
     slug: string;
     colors: {name: string; color: string}[];
     variants: VariantProduct[];
+    highlighted?: boolean | null;
 }
 
-export const CardProduct = ({img, name, price, slug, variants}: Props) => {
+export const CardProduct = ({img, name, price, slug, variants, highlighted}: Props) => {
     const navigate = useNavigate();
 
     // Calcular stock total de todas las variantes
@@ -65,8 +66,13 @@ export const CardProduct = ({img, name, price, slug, variants}: Props) => {
             )}
           </div>
           
-          <div className="absolute top-2 left-2">
-            {stock === 0 && <Tag contentTag="Agotado"/>}
+          {highlighted && (
+            <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-bl-lg rounded-tr-xl shadow-sm z-10 w-fit">
+              DESTACADO
+            </div>
+          )}
+          <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+            {stock === 0 && <Tag contentTag="Agotado" />}
           </div>
         </div>
 
