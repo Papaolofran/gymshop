@@ -292,7 +292,7 @@ export class OrderService {
          .maybeSingle();
 
        if (existingOrder) {
-         console.log('✅ El pago', paymentId, 'ya fue procesado anteriormente (Fila ID:', existingOrder.id, '). Ignorando duplicado.');
+         console.log('✅ El pago', paymentId, 'ya fue procesado anteriormente (Fila ID:', existingOrder.id, ').');
          return { success: true, message: 'Pago ya procesado anteriormente.', order: existingOrder };
        }
        // -----------------------------------------------------
@@ -314,7 +314,7 @@ export class OrderService {
            
            let MPitems = paymentParams.additional_info?.items;
 
-           console.log('✅ Procesando Pago MP:', paymentId, 'User:', user_id, 'Address:', address_id);
+           console.log('Procesando Pago MP:', paymentId, 'User:', user_id, 'Address:', address_id);
 
           const deliveryDate = new Date();
           deliveryDate.setDate(deliveryDate.getDate() + 7);
