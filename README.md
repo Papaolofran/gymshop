@@ -85,25 +85,62 @@ SUPABASE_KEY=tu_clave_de_servicio_de_supabase
 SUPABASE_SERVICE_KEY=tu_clave_de_servicio_de_supabase
 ```
 
-## Instrucciones de Ejecución
+## Instrucciones de Ejecución (Setup de Presentación)
 
-### Ejecutar el Frontend
+Para que el sistema funcione completamente (incluyendo el celular y la integración de Mercado Pago), se deben ejecutar **4 terminales simultáneamente**:
+
+### 📦 1. Servidor Backend
+
+Vaya a la carpeta `backend/` y ejecute:
 
 ```bash
-cd frontend
 pnpm run dev
 ```
 
-El frontend estará disponible en `http://localhost:5173`
+_Mantiene la lógica de negocio y conexión a base de datos (Puerto 3000)._
 
-### Ejecutar el Backend
+### 🎨 2. Cliente Frontend
+
+Vaya a la carpeta `frontend/` y ejecute:
 
 ```bash
-cd backend
 pnpm run dev
 ```
 
-El servidor API estará disponible en `http://localhost:3000`
+_Lanza la interfaz de usuario (Puerto 5173)._
+
+### 🌐 3. Túnel Frontend (ngrok)
+
+Ejecute en cualquier terminal:
+
+```bash
+ngrok http 5173
+```
+
+_Provee una URL HTTPS pública (ej: `https://rebbeca...`) para entrar desde el celular._
+
+### 🔗 4. Túnel Backend (localtunnel)
+
+Ejecute en cualquier terminal:
+
+```bash
+npx localtunnel --port 3000 --subdomain gymshop-backend-fran
+```
+
+_Permite que Mercado Pago envíe notificaciones (Webhooks) a tu computadora local._
+
+> [!TIP]
+> **Comando de Auto-Reinicio para Localtunnel:**
+> Si localtunnel se corta, usa este bucle para que se reinicie solo:
+> `while true; do npx localtunnel --port 3000 --subdomain gymshop-backend-fran; sleep 2; done`
+
+---
+
+### 📱 Configuración para Pruebas en Celular
+
+1. Asegúrate de que los archivos `.env` tengan las URLs de los túneles actuales.
+2. Abre la URL del backend (`https://gymshop-backend-fran.loca.lt`) en el celular primero y haz clic en **"Click to Continue"**.
+3. Abre la URL de ngrok y navega normalmente.
 
 ## Estructura del Proyecto
 

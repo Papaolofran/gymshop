@@ -27,6 +27,9 @@ export const LoginPage = () => {
 	};
 
 	if (isLoading) return <Loader />;
+	
+	// Si ya hay sesión, redirigimos al home, pero permitimos que el RootLayout 
+	// intercepte eventos de recuperación.
 	if (session) return <Navigate to='/' />;
 
 	const isPending = isLoginPending || isResetPending;

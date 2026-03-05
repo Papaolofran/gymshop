@@ -3,6 +3,13 @@ import { VariantRepository } from '../repositories/variant.repository.js';
 import { AddressRepository } from '../repositories/address.repository.js';
 import { UserRepository } from '../repositories/user.repository.js';
 import { ApiError } from '../middlewares/errorHandler.js';
+import { supabase } from '../config/database.js';
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
+
+// Configurar SDK de MercadoPago
+const mpClient = new MercadoPagoConfig({ 
+  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || process.env.MERCADOPAGO_TEST_ACCESS_TOKEN || 'TEST-INGRESA_TU_TOKEN_AQUI' 
+});
 
 // Interfaces para tipado
 interface OrderItem {
@@ -182,8 +189,16 @@ export class OrderService {
         user_id: user.id,
         direction_id: orderData.addressId,
         delivery_date: deliveryDate.toISOString(),
-        shipping_cost: 0, // Gratis por ahora
-        state: 'pending'
+        shipping_cost: 0,
+        state: 'pending',
+        address_data: {
+          address_line1: address.address_line1,
+          address_line2: address.address_line2,
+          city: address.city,
+          state: address.state,
+          postal_code: address.postal_code,
+          country: address.country
+        }
       });
 
       // 5. Crear items de la orden
@@ -210,6 +225,149 @@ export class OrderService {
       throw new ApiError(500, `Error al crear orden: ${errorMessage}`);
     }
   }
+
+  // --- INTEGRACION CON MERCADOPAGO ---
+  // Crear una preferencia de pago (Paso 1 del Checkout)
+  async createPaymentPreference(userId: string, orderData: { addressId: string; items: OrderItem[] }) {
+    try {
+      console.log(`🛒 Iniciando creación de pago - User: ${userId}, Items: ${orderData.items.length}`);
+      const user = await this.userRepository.findByUserId(userId);
+      if (!user) throw new ApiError(404, 'Usuario no encontrado');
+
+      const address = await this.addressRepository.findById(orderData.addressId);
+      if (!address) throw new ApiError(404, 'Dirección no encontrada');
+      if (address.user_id !== user.id) throw new ApiError(400, 'La dirección no pertenece a este usuario');
+
+      const validatedItems = await this.validateOrderItems(orderData.items);
+
+      // Mapear los items validados al formato de MercadoPago
+      const body = {
+        items: validatedItems.map(item => ({
+          id: item.variantId, // Se utiliza variantId en el ID
+          title: `GymShop Produto (Stock: ${item.currentStock})`, // Nombres hardcodeados por límite de base de datos actual, idealmente obtener el "Nombre" cruzando Variant->Product
+          quantity: item.quantity,
+          unit_price: Number(item.price),
+          currency_id: 'ARS',
+        })),
+        back_urls: {
+          success: `${(process.env.FRONTEND_URL || 'http://localhost:5173').trim()}/account/pedidos`,
+          pending: `${(process.env.FRONTEND_URL || 'http://localhost:5173').trim()}/checkout`,
+          failure: `${(process.env.FRONTEND_URL || 'http://localhost:5173').trim()}/checkout`
+        },
+        auto_return: 'approved', 
+        payer: {
+          email: user.email,
+          name: user.full_name ? user.full_name.split(' ')[0] : '',
+          surname: user.full_name && user.full_name.split(' ').length > 1 ? user.full_name.split(' ').slice(1).join(' ') : ''
+        },
+        metadata: {
+          user_id: user.id,
+          address_id: orderData.addressId
+        },
+        notification_url: process.env.MP_WEBHOOK_URL, 
+      };
+
+      const preference = new Preference(mpClient);
+      const result = await preference.create({ body });
+
+      return {
+        id: result.id,
+        init_point: result.init_point,
+      };
+    } catch (error) {
+      console.error('Error al crear preferencia MP:', error);
+      throw new ApiError(500, 'Error al conectar con MercadoPago');
+    }
+  }
+
+  // Procesar Webhook desde Mercado Pago (Paso 2: Aprobación)
+  async processMercadoPagoWebhook(paymentId: string) {
+    try {
+       // --- CONTROL DE DUPLICADOS PERSISTENTE (Solución Real) ---
+       // Verificamos en la BD si existe una orden con este pago
+       const { data: existingOrder } = await supabase
+         .from('orders')
+         .select('id, state')
+         .eq('payment_id', paymentId)
+         .maybeSingle();
+
+       if (existingOrder) {
+         console.log('✅ El pago', paymentId, 'ya fue procesado anteriormente (Fila ID:', existingOrder.id, '). Ignorando duplicado.');
+         return { success: true, message: 'Pago ya procesado anteriormente.', order: existingOrder };
+       }
+       // -----------------------------------------------------
+       
+       const paymentClient = new Payment(mpClient);
+       const paymentParams = await paymentClient.get({ id: paymentId });
+
+       // Aquí es donde SÓLO se crea la Orden si fue "approved" conforme a los requerimientos
+       if (paymentParams.status === 'approved') {
+          // Extraer Metadata y Items pagados
+           const metadata = paymentParams.metadata;
+           const user_id = metadata.user_id;
+           const address_id = metadata.address_id;
+
+           if (!user_id || !address_id) {
+             console.error('Metadata faltante en Pago MP:', metadata);
+             throw new ApiError(400, 'Metadata faltante en el pago de MercadoPago');
+           }
+           
+           let MPitems = paymentParams.additional_info?.items;
+
+           console.log('✅ Procesando Pago MP:', paymentId, 'User:', user_id, 'Address:', address_id);
+
+          const deliveryDate = new Date();
+          deliveryDate.setDate(deliveryDate.getDate() + 7);
+
+           // 1. Obtener dirección original para "tomar la foto"
+           const address = await this.addressRepository.findById(address_id);
+
+           // 2. Crear Orden Definiva (LA ORDEN NO SE CREA HASTA QUE SE PAGA)
+           const order = await this.orderRepository.create({
+              user_id: user_id,
+              direction_id: address_id,
+              delivery_date: deliveryDate.toISOString(),
+              shipping_cost: 0,
+              state: 'pending',
+              payment_id: paymentId,
+              address_data: address ? {
+                address_line1: address.address_line1,
+                address_line2: address.address_line2,
+                city: address.city,
+                state: address.state,
+                postal_code: address.postal_code,
+                country: address.country
+              } : null
+           });
+
+          // 2. Mapear y crear los items de confirmación
+          if (MPitems && MPitems.length > 0) {
+             const orderItems = MPitems.map((item: any) => ({
+                order_id: order.id,
+                variant_id: item.id,
+                quantity: Number(item.quantity),
+                price: Number(item.unit_price)
+             }));
+
+             await this.orderRepository.createOrderItems(orderItems);
+
+             // 3. Descontar stock! (Como si hubiesen sido validados previamente)
+             for (const item of MPitems) {
+               const variant = await this.variantRepository.findById(item.id);
+               if (variant) {
+                 await this.variantRepository.updateStock(item.id, variant.stock - Number(item.quantity));
+               }
+             }
+          }
+          return { success: true, message: 'Orden generada sobre pago exitoso.' };
+       }
+       return { success: false, message: 'Pago no ha sido aprobado todavía.' };
+    } catch(err) {
+       console.error("Fallo al procesar MS webhook.", err);
+       throw new ApiError(500, 'Error interno del webhook MP');
+    }
+  }
+  // --- FIN MERCADOPAGO ---
 
   // Actualizar estado de orden (solo admin)
   async updateOrderStatus(id: number, status: string) {

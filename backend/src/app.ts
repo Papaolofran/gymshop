@@ -11,7 +11,9 @@ const app = express();
 
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
+  credentials: true,
+  exposedHeaders: ['bypass-tunnel-reminder'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'bypass-tunnel-reminder']
 }));
 
 app.use(express.json());

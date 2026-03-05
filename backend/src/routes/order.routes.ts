@@ -5,6 +5,9 @@ import {
   getOrdersByUser,
   getOrderById,
   createOrder,
+  createPaymentPreference,
+  handlePaymentWebhook,
+  verifyPayment,
   updateOrderStatus
 } from '../controllers/order.controller.js';
 
@@ -20,9 +23,14 @@ router.get('/', authenticate, authorize('admin'), getAllOrders);           // Li
 // Ruta anidada para órdenes de usuario
 router.get('/user/:userId', authenticate, getOrdersByUser);                // Órdenes de un usuario
 
+// Integración con MercadoPago
+router.post('/preference', authenticate, createPaymentPreference);
+router.post('/webhook', handlePaymentWebhook); // El webhook no usa authenticate porque viene de MP
+router.get('/verify-payment/:paymentId', authenticate, verifyPayment); // Verificación manual desde frontend (fallback dev)
+
 // Rutas genéricas con parámetros
 router.get('/:id', authenticate, getOrderById);                            // Obtener una orden
-router.post('/', authenticate, createOrder);                               // Crear orden
+router.post('/', authenticate, createOrder);                               // Crear orden (alternativa manual)
 router.put('/:id/status', authenticate, authorize('admin'), updateOrderStatus); // Actualizar estado (solo admin)
 router.put('/:id/cancel', authenticate, updateOrderStatus);               // Cancelar orden (usuario o admin)
 

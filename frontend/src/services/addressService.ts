@@ -1,11 +1,14 @@
 import axios from 'axios';
 import { getAuthToken } from '../helpers/getAuthToken';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const apiClient = axios.create({
   baseURL: API_URL,
   timeout: 10000,
+  headers: {
+    'bypass-tunnel-reminder': 'true'
+  }
 });
 
 // Interface para dirección

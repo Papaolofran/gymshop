@@ -1,19 +1,18 @@
 import { useState } from 'react';
-import { Navigate, useNavigate, Link } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { useCartStore } from '../store/cart.store';
 import { useUser } from '../hooks/auth/useUser';
-import { useCreateOrder } from '../hooks/useOrders';
+import { useCreatePaymentPreference } from '../hooks/useOrders';
 import { useAddressesByUser } from '../hooks/useAddresses';
 import { formatPrice } from '../helpers';
 import { LuLoaderCircle, LuCheck } from 'react-icons/lu';
 import { HiPhoto } from 'react-icons/hi2';
 
 export const CheckoutPage = () => {
-  const navigate = useNavigate();
   const { session } = useUser();
   const userId = session?.user?.id || '';
   const { items, getTotalPrice, clearCart } = useCartStore();
-  const { mutate: createOrder, isPending } = useCreateOrder();
+  const { mutate: createPaymentPreference, isPending } = useCreatePaymentPreference();
   const { data: addresses = [], isLoading: loadingAddresses } = useAddressesByUser(userId);
   
   const [selectedAddress, setSelectedAddress] = useState('');
@@ -43,11 +42,12 @@ export const CheckoutPage = () => {
       }))
     };
 
-    createOrder(orderData, {
-      onSuccess: (order) => {
+    createPaymentPreference(orderData, {
+      onSuccess: (preference) => {
         setOrderCompleted(true);
         clearCart();
-        navigate(`/orders/${order.id.toString()}`);
+        // Redirigir a MercadoPago
+        window.location.href = preference.init_point;
       }
     });
   };
@@ -202,10 +202,10 @@ export const CheckoutPage = () => {
               {isPending ? (
                 <>
                   <LuLoaderCircle className="animate-spin" size={20} />
-                  Procesando...
+                  Redirigiendo a MercadoPago...
                 </>
               ) : (
-                'Confirmar Compra'
+                'Pagar con MercadoPago'
               )}
             </button>
           </div>

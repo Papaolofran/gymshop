@@ -2,6 +2,7 @@ import type { Response } from 'express';
 import type { AuthRequest } from '../middlewares/auth.js';
 import { OrderService } from '../services/order.service.js';
 import { ApiError } from '../middlewares/errorHandler.js';
+import { Request } from 'express';
 
 // Controller: Capa que recibe peticiones HTTP de órdenes
 // Gestiona la creación y consulta de órdenes de compra
@@ -63,17 +64,91 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
     throw new ApiError(400, 'Dirección e items son requeridos');
   }
 
-  const order = await orderService.createOrder(req.user.id, {
-    addressId,
-    items
-  });
+  try {
+    const order = await orderService.createOrder(req.user.id, {
+      addressId,
+      items
+    });
 
-  res.status(201).json({
-    success: true,
-    message: 'Orden creada correctamente',
-    data: order
-  });
+    res.status(201).json({
+      success: true,
+      message: 'Orden creada correctamente',
+      data: order
+    });
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    res.status(500).json({
+      success: false,
+      message: 'Error interno al crear la orden'
+    });
+  }
 };
+
+// --- MERCADO PAGO INTEGRATION ---
+// POST /api/orders/preference - Crear la preferencia en MercadoPago
+export const createPaymentPreference = async (req: AuthRequest, res: Response) => {
+  const { addressId, items } = req.body;
+
+  if (!req.user) {
+    throw new ApiError(401, 'Usuario no autenticado');
+  }
+
+  try {
+    const preference = await orderService.createPaymentPreference(req.user.id, {
+      addressId,
+      items
+    });
+
+    res.status(200).json({
+      success: true,
+      data: preference
+    });
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    res.status(500).json({
+      success: false,
+      message: 'Error al generar la preferencia de pago'
+    });
+  }
+};
+
+// POST /api/orders/webhook - Recibe notificaciones de MP
+export const handlePaymentWebhook = async (req: Request, res: Response) => {
+  try {
+    // MP envía topic y id o type y data.id
+    const { type, 'data.id': dataId, topic, id } = req.query;
+
+    const action = type || topic;
+    const paymentId = (dataId || id) as string;
+
+    if (action === 'payment' && paymentId) {
+       await orderService.processMercadoPagoWebhook(paymentId);
+    }
+
+    // MercadoPago requiere que siempre devuelvas 200 OK
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('Webhook processing failed:', error);
+    // Return 200 anyway so MP doesn't retry infinitely and crash server unless we really need retry
+    res.status(200).send('OK');
+  }
+};
+
+// GET /api/orders/verify-payment/:paymentId - Verificación manual por el frontend (fallback dev)
+export const verifyPayment = async (req: AuthRequest, res: Response) => {
+  const { paymentId } = req.params;
+  try {
+    const result = await orderService.processMercadoPagoWebhook(paymentId);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Error in manual payment verification:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error instanceof ApiError ? error.message : 'Error al verificar pago' 
+    });
+  }
+};
+// --- FIN MERCADOPAGO ---
 
 // PUT /api/orders/:id/status - Actualizar estado de orden (admin)
 // PUT /api/orders/:id/cancel - Cancelar orden (usuario o admin)

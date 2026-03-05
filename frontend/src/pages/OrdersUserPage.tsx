@@ -1,7 +1,8 @@
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useUser } from '../hooks/auth/useUser';
-import { useOrdersByUser, useCancelOrder } from '../hooks/useOrders';
+import { useOrdersByUser, useCancelOrder, useVerifyPayment } from '../hooks/useOrders';
 import { formatPrice } from '../helpers';
+import toast from 'react-hot-toast';
 import { LuLoaderCircle, LuX, LuRefreshCw, LuWifiOff } from 'react-icons/lu';
 import { HiPhoto } from 'react-icons/hi2';
 import { useState, useMemo, useEffect } from 'react';
@@ -18,7 +19,7 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-	pending: 'Pendiente',
+	pending: 'Orden creada',
 	processing: 'Procesando',
 	shipped: 'Enviado',
 	delivered: 'Entregado',
@@ -29,7 +30,43 @@ export const OrdersUserPage = () => {
 	const { session, isLoading: isLoadingSession } = useUser();
 	const { data: orders = [], isLoading, isError, refetch } = useOrdersByUser(session?.user?.id || '');
 	const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder();
+	const { mutate: verifyPayment, isPending: isVerifying } = useVerifyPayment();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [isRefetching, setIsRefetching] = useState(false);
+	
+	// Verificar pago si venimos de MercadoPago (fallback dev)
+	useEffect(() => {
+		const paymentId = searchParams.get('payment_id');
+		if (paymentId) {
+			console.log('Detectado payment_id de MercadoPago:', paymentId);
+			verifyPayment(paymentId, {
+				onSuccess: (data) => {
+					console.log('Verificación de pago completada:', data);
+					// Limpiar parámetros de la URL
+					searchParams.delete('payment_id');
+					searchParams.delete('status');
+					searchParams.delete('preference_id');
+					searchParams.delete('collection_id');
+					searchParams.delete('collection_status');
+					searchParams.delete('external_reference');
+					searchParams.delete('payment_type');
+					searchParams.delete('merchant_order_id');
+					searchParams.delete('site_id');
+					searchParams.delete('processing_mode');
+					searchParams.delete('merchant_account_id');
+					setSearchParams(searchParams);
+					
+					if (data.success) {
+						toast.success('¡Gracias por tu compra! Tu pedido ha sido procesado.');
+					}
+					refetch();
+				},
+				onError: (err) => {
+					console.error('Error verificando pago:', err);
+				}
+			});
+		}
+	}, [searchParams, verifyPayment, setSearchParams, refetch]);
 	
 	const [statusFilter, setStatusFilter] = useState<string>('all');
 	const [currentPage, setCurrentPage] = useState<number>(1);
@@ -96,11 +133,11 @@ export const OrdersUserPage = () => {
 	};
 
 	// Pantalla de carga
-	if (isLoading) {
+	if (isLoading || isVerifying) {
 		return (
 			<div className="flex justify-center items-center h-[60vh] flex-col gap-4">
 				<LuLoaderCircle className="animate-spin text-blue-600" size={60} />
-				<p className="text-gray-500">Cargando tus pedidos...</p>
+				<p className="text-gray-500">{isVerifying ? 'Verificando tu pago...' : 'Cargando tus pedidos...'}</p>
 			</div>
 		);
 	}

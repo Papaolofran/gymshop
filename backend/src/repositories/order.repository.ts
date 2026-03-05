@@ -77,6 +77,8 @@ export class OrderRepository {
     delivery_date: string;
     shipping_cost: number;
     state?: string;
+    payment_id?: string;
+    address_data?: any;
   }) {
     const { data, error } = await supabase
       .from('orders')

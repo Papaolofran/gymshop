@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createOrder, getOrderById, getOrdersByUser, cancelOrder, getAllOrders, updateOrderStatus } from '../services/orderService';
+import { createOrder, createPaymentPreference, verifyPayment, getOrderById, getOrdersByUser, cancelOrder, getAllOrders, updateOrderStatus } from '../services/orderService';
 import toast from 'react-hot-toast';
 import { useEffect } from 'react';
 
@@ -69,6 +69,29 @@ export const useOrderById = (orderId: string) => {
   }, [query.error, orderId]);
   
   return query;
+};
+
+// Hook para crear una preferencia de pago de MP
+export const useCreatePaymentPreference = () => {
+  return useMutation({
+    mutationFn: createPaymentPreference,
+    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
+      const message = error.response?.data?.message || 'Error al generar la preferencia de pago';
+      toast.error(message);
+    }
+  });
+};
+
+// Hook para verificar un pago (fallback dev)
+export const useVerifyPayment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (paymentId: string) => verifyPayment(paymentId),
+    onSuccess: () => {
+      // Invalidar listas de órdenes para mostrar la nueva orden creada
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    }
+  });
 };
 
 // Hook para crear una orden

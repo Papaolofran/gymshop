@@ -24,7 +24,7 @@ export const ResetPasswordPage = () => {
 			} else {
 				timeout = setTimeout(() => {
 					setIsWaitingForSession(false);
-				}, 1500);
+				}, 5000); // Aumentamos a 5 segundos para dar margen en móviles/redes lentas
 			}
 		}
 

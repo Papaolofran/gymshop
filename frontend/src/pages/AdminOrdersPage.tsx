@@ -18,7 +18,7 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  pending: 'Pendiente',
+  pending: 'Orden creada',
   processing: 'Procesando',
   shipped: 'Enviado',
   delivered: 'Entregado',

@@ -121,8 +121,9 @@ export const getSession = async () => {
 };
 
 export const resetPasswordForEmail = async (email: string) => {
+	const frontendUrl = import.meta.env.VITE_FRONTEND_URL || window.location.origin;
 	const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-		redirectTo: `${window.location.origin}/reestablecer-password`,
+		redirectTo: `${frontendUrl}/reestablecer-password`,
 	});
 
 	if (error) {
