@@ -5,10 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const apiClient = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
-  headers: {
-    'bypass-tunnel-reminder': 'true'
-  }
+  timeout: 10000
 });
 
 // Interface para dirección

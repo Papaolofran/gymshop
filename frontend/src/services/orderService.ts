@@ -9,13 +9,9 @@ import type {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// Cliente centralizado para evitar repetición de configuración
 const apiClient = axios.create({
   baseURL: API_URL,
-  timeout: 15000,
-  headers: {
-    'bypass-tunnel-reminder': 'true'
-  }
+  timeout: 15000
 });
 
 // Helper para configurar headers de autenticación
