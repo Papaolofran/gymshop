@@ -5,7 +5,7 @@ import { useUserProfile } from '../hooks/useUsers';
 import { useAllOrders, useUpdateOrderStatus } from '../hooks/useOrders';
 import { LuLoaderCircle, LuSearch, LuPackage } from 'react-icons/lu';
 import { formatPrice } from '../helpers';
-import type { Order } from '../services/orderService';
+import type { Order } from '../interfaces/order.interface';
 import { useModalStore } from '../store/modal.store';
 import { Pagination } from '../components/shared/Pagination';
 

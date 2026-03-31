@@ -128,10 +128,10 @@ export const OrderDetailPage = () => {
                   className="flex gap-4 pb-4 border-b border-gray-200 last:border-0"
                 >
                   <div className="w-20 h-20 flex-shrink-0 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
-                    {item.variant.product.images && item.variant.product.images.length > 0 ? (
+                    {item.variant?.product?.images && item.variant.product.images.length > 0 ? (
                       <img
                         src={item.variant.product.images[0]}
-                        alt={item.variant.product.name}
+                        alt={item.variant.product.name || 'Producto'}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -140,18 +140,18 @@ export const OrderDetailPage = () => {
                   </div>
                   
                   <div className="flex-1">
-                    <h3 className="font-semibold">{item.variant.product.name}</h3>
+                    <h3 className="font-semibold">{item.variant?.product?.name}</h3>
                     <p className="text-sm text-gray-600">
-                      {item.variant.color && item.variant.colorName && (
+                      {item.variant?.color && item.variant?.colorName && (
                         <span className="mr-2">Color: {item.variant.colorName}</span>
                       )}
-                      {item.variant.size && (
+                      {item.variant?.size && (
                         <span className="mr-2">Talla: {item.variant.size}</span>
                       )}
-                      {item.variant.flavor && (
+                      {item.variant?.flavor && (
                         <span className="mr-2">Sabor: {item.variant.flavor}</span>
                       )}
-                      {item.variant.weight && (
+                      {item.variant?.weight && (
                         <span className="mr-2">Peso: {item.variant.weight}</span>
                       )}
                     </p>
@@ -178,10 +178,10 @@ export const OrderDetailPage = () => {
             <h2 className="text-xl font-semibold mb-4">Dirección de Envío</h2>
             
             <div className="text-gray-700">
-              <p className="font-medium">{order.address.street}</p>
-              <p>{order.address.city}, {order.address.state}</p>
-              <p>{order.address.postalCode}</p>
-              <p>{order.address.country}</p>
+              <p className="font-medium">{order.address?.street}</p>
+              <p>{order.address?.city}, {order.address?.state}</p>
+              <p>{order.address?.postalCode}</p>
+              <p>{order.address?.country}</p>
             </div>
           </div>
         </div>

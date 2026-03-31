@@ -16,7 +16,7 @@ export const ResetPasswordPage = () => {
 
 	// Efecto para dar tiempo a la sincronización de sesión entre pestañas
 	useEffect(() => {
-		let timeout: NodeJS.Timeout;
+		let timeout: ReturnType<typeof setTimeout>;
 
 		if (!isUserLoading) {
 			if (session) {

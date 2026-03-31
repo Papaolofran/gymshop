@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { LuLoaderCircle, LuX, LuRefreshCw, LuWifiOff } from 'react-icons/lu';
 import { HiPhoto } from 'react-icons/hi2';
 import { useState, useMemo, useEffect } from 'react';
-import type { Order } from '../services/orderService';
+import type { Order } from '../interfaces/order.interface';
 import { useModalStore } from '../store/modal.store';
 import { Pagination } from '../components/shared/Pagination';
 
@@ -303,7 +303,7 @@ export const OrdersUserPage = () => {
 													<div className="flex gap-2 mt-6 flex-wrap">
 														{order.items.slice(0, 4).map((item: Order['items'][0]) => (
 															<div key={item.id} className="w-16 h-16 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center">
-																{item.variant.product.images && item.variant.product.images.length > 0 ? (
+																{item.variant?.product?.images && item.variant.product.images.length > 0 ? (
 																	<img
 																		src={item.variant.product.images[0]}
 																		alt={item.variant.product.name}

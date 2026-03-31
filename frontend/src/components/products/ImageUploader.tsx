@@ -1,4 +1,5 @@
-import { useState, useRef, DragEvent, ChangeEvent } from 'react';
+import { useState, useRef } from 'react';
+import type { DragEvent, ChangeEvent } from 'react';
 import { LuLoaderCircle, LuUpload, LuX, LuImage } from 'react-icons/lu';
 import { uploadProductImage } from '../../services/productAdminService';
 import toast from 'react-hot-toast';
